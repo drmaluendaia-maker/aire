@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Título de la pestaña del navegador -->
+    <title>Asistente ISR - Hospital Ilia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .tab-active {
+            border-color: #4f46e5;
+            color: #e0e7ff;
+            background-color: #4f46e5;
+        }
+        .tab-inactive {
+            border-color: #4b5563;
+            color: #d1d5db;
+        }
+        .scenario-card {
+            display: none;
+        }
+        .scenario-card.active {
+            display: block;
+        }
+        .checklist-item input:checked + label {
+            text-decoration: line-through;
+            color: #6b7280;
+        }
+
+        /* Estilos V5: Estética simple + Timeline */
+        .step-header {
+            @apply flex justify-between items-baseline mb-3 border-b border-gray-700 pb-2;
+        }
+        .step-title {
+            @apply text-xl font-bold text-indigo-400;
+        }
+        .step-time-explained {
+            @apply text-sm font-semibold text-gray-400;
+        }
+
+        .option-buttons {
+            @apply flex flex-wrap gap-2 mb-3;
+        }
+        .drug-option-btn {
+            @apply bg-gray-600 text-gray-200 py-2 px-4 rounded-lg transition-colors duration-200 border-2 border-gray-600 text-sm;
+        }
+        .drug-option-btn.active {
+            @apply bg-indigo-700 text-white border-indigo-500 shadow-md;
+        }
+        .drug-option-btn:not(.active):hover {
+            @apply bg-gray-500;
+        }
+        
+        /* La tarjeta de detalles es ahora el contenedor principal */
+        .drug-details-card {
+            @apply bg-gray-700 p-4 rounded-lg; /* Tarjeta anidada, sin sombra ni margen */
+            border-left-width: 4px;
+        }
+        .pretreatment { border-left-color: #f59e0b; }
+        .induction { border-left-color: #8b5cf6; }
+        .paralysis { border-left-color: #ec4899; }
+        .omit { border-left-color: #6b7280; }
+
+        .detail-grid {
+            @apply grid grid-cols-1 md:grid-cols-3 gap-4;
+        }
+        .detail-item h4 {
+            @apply text-sm font-semibold text-gray-400 uppercase tracking-wider;
+        }
+        /* Eliminamos la regla general conflictiva '.detail-item p' que estaba aquí */
+
+        /* Reglas más específicas para anular el color de texto por defecto */
+        /* **** FIX: Añadido !important para forzar el color verde **** */
+        .detail-item .dose-mg {
+            @apply text-green-400 !important font-bold text-lg; 
+        }
+        .detail-item .dose-ml {
+            @apply text-green-400 !important font-bold text-lg;
+        }
+
+        .dose-placeholder {
+            @apply text-yellow-500;
+        }
+
+        /* Línea de tiempo visual */
+        .timeline {
+            @apply flex items-center justify-between w-full bg-gray-800 p-4 rounded-lg mb-6;
+        }
+        .timeline-step {
+            @apply flex flex-col items-center text-center;
+        }
+        .timeline-dot {
+            @apply w-5 h-5 rounded-full border-4;
+        }
+        .timeline-bar {
+            @apply h-1 bg-gray-600 flex-1;
+        }
+        .timeline-step-1 .timeline-dot { @apply bg-yellow-400 border-yellow-200; }
+        .timeline-step-1 .timeline-label { @apply text-yellow-400; }
+        .timeline-step-2 .timeline-dot { @apply bg-purple-400 border-purple-200; }
+        .timeline-step-2 .timeline-label { @apply text-purple-400; }
+        .timeline-step-3 .timeline-dot { @apply bg-pink-400 border-pink-200; }
+        .timeline-step-3 .timeline-label { @apply text-pink-400; }
+        .timeline-label { @apply text-sm font-semibold mt-2; }
+        .timeline-time { @apply text-xs text-gray-400; }
+
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 antialiased">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-5xl">
+        <!-- **** TÍTULO MODIFICADO **** -->
+        <header class="text-center mb-8">
+             <div class="flex items-center justify-center gap-4">
+                <svg class="w-10 h-10 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                </svg>
+                <h1 class="text-3xl font-bold text-indigo-400">Secuencia de Intubación Rápida</h1>
+            </div>
+            <p class="mt-2 text-2xl text-indigo-300">- Asistente de Crisis -</p>
+            <p class="mt-2 text-lg text-gray-400">Hospital Ilia</p>
+        </header>
+        <!-- **** FIN TÍTULO MODIFICADO **** -->
+
+        <!-- 1. Peso -->
+        <div class="mb-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
+            <label for="patient-weight" class="block text-lg font-semibold text-gray-300 mb-2">1. Peso del Paciente (kg)</label>
+            <div class="flex items-center gap-4">
+                <input type="number" id="patient-weight" placeholder="Ej: 70" class="w-full bg-gray-700 text-white rounded-lg border-2 border-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 p-3 text-lg transition-all duration-300">
+                <button id="calculate-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-5 rounded-lg transition-colors whitespace-nowrap">
+                    Generar
+                </button>
+                <button id="clear-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-5 rounded-lg transition-colors">
+                    Limpiar
+                </button>
+            </div>
+            <p id="weight-display" class="text-sm text-green-400 mt-2 h-5"></p>
+        </div>
+
+        <!-- 2. Checklist -->
+        <div class="mb-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4">2. Checklist de Preparación (SOAPME)</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 text-sm">
+                <!-- S -->
+                <div class="space-y-2">
+                    <h3 class="font-bold text-lg text-gray-300">S<span class="text-indigo-400">uction</span> (Aspiración)</h3>
+                    <div class="checklist-item"><input id="c1" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c1" class="ml-2">Sistema de aspiración funcional</label></div>
+                    <div class="checklist-item"><input id="c2" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c2" class="ml-2">Cánula de Yankauer</label></div>
+                </div>
+                <!-- O -->
+                <div class="space-y-2">
+                    <h3 class="font-bold text-lg text-gray-300">O<span class="text-indigo-400">xygen</span> (Oxígeno)</h3>
+                    <div class="checklist-item"><input id="c3" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c3" class="ml-2">Fuente de O₂ de alto flujo</label></div>
+                    <div class="checklist-item"><input id="c4" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c4" class="ml-2">Mascarilla con reservorio</label></div>
+                    <div class="checklist-item"><input id="c5" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c5" class="ml-2">Bolsa autoinflable (Ambú)</label></div>
+                </div>
+                <!-- A -->
+                <div class="space-y-2">
+                    <h3 class="font-bold text-lg text-gray-300">A<span class="text-indigo-400">irway</span> (Vía Aérea)</h3>
+                    <div class="checklist-item"><input id="c6" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c6" class="ml-2">Laringoscopio (mango y pilas OK)</label></div>
+                    <div class="checklist-item"><input id="c7" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c7" class="ml-2">Hojas (Mac, Miller, varios tamaños)</label></div>
+                    <div class="checklist-item"><input id="c8" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c8" class="ml-2">Tubos IOT (previsto, -1, +1)</label></div>
+                    <div class="checklist-item"><input id="c9" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c9" class="ml-2">Guía o estilete</label></div>
+                    <div class="checklist-item"><input id="c10" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c10" class="ml-2">Jeringa de 10cc</label></div>
+                </div>
+                <!-- P -->
+                 <div class="space-y-2">
+                    <h3 class="font-bold text-lg text-gray-300">P<span class="text-indigo-400">harmacy</span> (Fármacos)</h3>
+                    <div class="checklist-item"><input id="c11" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c11" class="ml-2">Agentes de inducción cargados</label></div>
+                    <div class="checklist-item"><input id="c12" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c12" class="ml-2">Bloqueantes neuromusculares</label></div>
+                    <div class="checklist-item"><input id="c13" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c13" class="ml-2">Fármacos de pre-tratamiento</label></div>
+                    <div class="checklist-item"><input id="c14" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c14" class="ml-2">Vasopresores (ej. adrenalina)</label></div>
+                </div>
+                <!-- M -->
+                <div class="space-y-2">
+                    <h3 class="font-bold text-lg text-gray-300">M<span class="text-indigo-400">onitoring</span> (Monitorización)</h3>
+                    <div class="checklist-item"><input id="c15" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c15" class="ml-2">Monitor cardíaco / EKG</label></div>
+                    <div class="checklist-item"><input id="c16" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c16" class="ml-2">Presión arterial no invasiva</label></div>
+                    <div class="checklist-item"><input id="c17" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c17" class="ml-2">Pulsioximetría</label></div>
+                    <div class="checklist-item"><input id="c18" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c18" class="ml-2">Capnografía (EtCO₂)</label></div>
+                </div>
+                <!-- E -->
+                 <div class="space-y-2">
+                    <h3 class="font-bold text-lg text-gray-300">E<span class="text-indigo-400">quipment</span> (Vía Aérea Fallida)</h3>
+                    <div class="checklist-item"><input id="c19" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c19" class="ml-2">Plan B: Dispositivo supraglótico</label></div>
+                    <div class="checklist-item"><input id="c20" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c20" class="ml-2">Plan D: Equipo de cricotiroidotomía</label></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Dispositivos -->
+        <div class="mb-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4">3. Selección de Dispositivos</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Tubo IOT -->
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-300 mb-3">Tubo Endotraqueal (IOT)</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <h4 class="font-semibold text-gray-200">Adultos:</h4>
+                            <ul class="list-disc list-inside text-gray-400">
+                                <li><b>Mujeres:</b> Tubo 7.0 - 7.5 mm</li>
+                                <li><b>Hombres:</b> Tubo 8.0 - 8.5 mm</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-200">Pediátrico (>1 año):</h4>
+                            <p class="text-gray-400 text-sm">Sin manguito: <code class="bg-gray-700 p-1 rounded">(Edad / 4) + 4</code></p>
+                            <p class="text-gray-400 text-sm mt-1">Con manguito: <code class="bg-gray-700 p-1 rounded">(Edad / 4) + 3.5</code></p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Cánula Guedel -->
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-300 mb-3">Cánula de Guedel (Mayo)</h3>
+                     <ul class="space-y-1 text-gray-400 text-sm">
+                        <li class="flex items-center"><span class="w-12 text-center mr-2 p-1 bg-red-200 text-red-800 rounded font-mono">000</span> Rosa: Neonatos</li>
+                        <li class="flex items-center"><span class="w-12 text-center mr-2 p-1 bg-blue-200 text-blue-800 rounded font-mono">00</span> Azul: Lactantes</li>
+                        <li class="flex items-center"><span class="w-12 text-center mr-2 p-1 bg-gray-300 text-black rounded font-mono">0</span> Negro: Niños pequeños</li>
+                        <li class="flex items-center"><span class="w-12 text-center mr-2 p-1 bg-white text-black rounded font-mono">1</span> Blanco: Niños mayores</li>
+                        <li class="flex items-center"><span class="w-12 text-center mr-2 p-1 bg-green-200 text-green-800 rounded font-mono">2</span> Verde: Adultos pequeños</li>
+                        <li class="flex items-center"><span class="w-12 text-center mr-2 p-1 bg-yellow-200 text-yellow-800 rounded font-mono">3</span> Amarillo: Adultos medianos</li>
+                        <li class="flex items-center"><span class="w-12 text-center mr-2 p-1 bg-red-400 text-white rounded font-mono">4</span> Rojo: Adultos grandes</li>
+                        <li class="flex items-center"><span class="w-12 text-center mr-2 p-1 bg-orange-300 text-orange-800 rounded font-mono">5</span> Naranja: Adultos muy grandes</li>
+                    </ul>
+                </div>
+                <!-- Hojas Laringo -->
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-300 mb-3">Hojas de Laringoscopio</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <h4 class="font-semibold text-gray-200">Macintosh (Curva):</h4>
+                            <p class="text-xs text-gray-500">Adultos. Punta en valécula.</p>
+                            <ul class="list-disc list-inside text-gray-400">
+                                <li><b>Nº 3:</b> Adulto estándar</li>
+                                <li><b>Nº 4:</b> Adulto grande / Obeso</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-200">Miller (Recta):</h4>
+                            <p class="text-xs text-gray-500">Pediátrico. Levanta epiglotis.</p>
+                             <ul class="list-disc list-inside text-gray-400">
+                                <li><b>Nº 0:</b> Neonato</li>
+                                <li><b>Nº 1:</b> Lactante</li>
+                                <li><b>Nº 2:</b> Niño</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Dosis -->
+        <div>
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4 text-center">4. Cálculo de Dosis por Escenario Clínico</h2>
+            
+            <!-- NUEVA Línea de Tiempo Visual -->
+            <div class="timeline">
+                <div class="timeline-step timeline-step-1">
+                    <div class="timeline-dot"></div>
+                    <span class="timeline-label">Pre-tratamiento</span>
+                    <span class="timeline-time">T-3 min</span>
+                </div>
+                <div class="timeline-bar"></div>
+                <div class="timeline-step timeline-step-2">
+                    <div class="timeline-dot"></div>
+                    <span class="timeline-label">Inducción</span>
+                    <span class="timeline-time">T-0</span>
+                </div>
+                <div class="timeline-bar"></div>
+                <div class="timeline-step timeline-step-3">
+                    <div class="timeline-dot"></div>
+                    <span class="timeline-label">Parálisis</span>
+                    <span class="timeline-time">T+5 seg</span>
+                </div>
+            </div>
+            
+            <!-- Tabs de Escenarios -->
+            <div class="mb-6">
+                <nav class="flex flex-wrap justify-center gap-2 md:gap-4" id="scenario-tabs">
+                    <button data-scenario="standard" class="tab-button tab-active text-sm md:text-base font-semibold py-2 px-4 rounded-lg border-2 transition-all duration-300">Paciente Estándar</button>
+                    <button data-scenario="hemodynamic" class="tab-button tab-inactive text-sm md:text-base font-semibold py-2 px-4 rounded-lg border-2 transition-all duration-300">Inestabilidad Hemodinámica</button>
+                    <button data-scenario="tce" class="tab-button tab-inactive text-sm md:text-base font-semibold py-2 px-4 rounded-lg border-2 transition-all duration-300">TCE / HIC</button>
+                    <button data-scenario="bronchospasm" class="tab-button tab-inactive text-sm md:text-base font-semibold py-2 px-4 rounded-lg border-2 transition-all duration-300">Broncoespasmo Severo</button>
+                </nav>
+            </div>
+
+            <!-- Contenedor de Escenarios -->
+            <div id="scenarios-container">
+                <!-- Escenario Estándar -->
+                <div id="standard" class="scenario-card active">
+                    <h3 class="text-2xl font-bold text-gray-200 mb-2" id="standard-name"></h3>
+                    <p class="text-gray-400 mb-6" id="standard-objective"></p>
+                    <div class="space-y-0" id="standard-steps-container"></div>
+                </div>
+                <!-- Escenario Hemodinámico -->
+                <div id="hemodynamic" class="scenario-card">
+                    <h3 class="text-2xl font-bold text-gray-200 mb-2" id="hemodynamic-name"></h3>
+                    <p class="text-gray-400 mb-6" id="hemodynamic-objective"></p>
+                    <div class="space-y-0" id="hemodynamic-steps-container"></div>
+                </div>
+                <!-- Escenario TCE -->
+                <div id="tce" class="scenario-card">
+                    <h3 class="text-2xl font-bold text-gray-200 mb-2" id="tce-name"></h3>
+                    <p class="text-gray-400 mb-6" id="tce-objective"></p>
+                    <div class="space-y-0" id="tce-steps-container"></div>
+                </div>
+                <!-- Escenario Broncoespasmo -->
+                <!-- **** FIX: Corregidos los IDs 'bronchasm-name' y 'bronchasm-objective' **** -->
+                <div id="bronchospasm" class="scenario-card">
+                     <h3 class="text-2xl font-bold text-gray-200 mb-2" id="bronchospasm-name"></h3>
+                    <p class="text-gray-400 mb-6" id="bronchospasm-objective"></p>
+                    <div class="space-y-0" id="bronchospasm-steps-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Procedimiento Post-Parálisis -->
+        <div class="mt-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4">5. Procedimiento Post-Parálisis</h2>
+            <ol class="list-decimal list-inside space-y-4 text-gray-300">
+                <li>
+                    <strong class="font-semibold text-gray-100">Posicionamiento y Protección:</strong>
+                    <p class="text-sm text-gray-400 ml-5">Mientras los fármacos actúan (~45-60s), optimice la posición. Use la "posición de olfateo" (cabeza elevada) o "rampa" en pacientes obesos. Considere la maniobra BURP para mejorar la visualización laríngea.</p>
+                </li>
+                <li>
+                    <strong class="font-semibold text-gray-100">Paso del Tubo:</strong>
+                    <p class="text-sm text-gray-400 ml-5">Con relajación muscular completa, realice la laringoscopia. Visualice las cuerdas vocales e inserte el tubo endotraqueal. Retire la guía e infle el neumotaponador.</p>
+                </li>
+                <li>
+                    <strong class="font-semibold text-gray-100">Manejo Post-Intubación (Confirmación):</strong>
+                    <p class="text-sm text-gray-400 ml-5">El paso más crítico. Confirme la posición con <strong class="text-yellow-300">Capnografía de Onda (EtCO₂)</strong> (Gold Standard). Ausculte y asegure el tubo. Inicie sedación continua y evalúe con la mnemotecnia DOPE si hay deterioro (Desplazamiento, Obstrucción, Pneumotórax, Equipo).</p>
+                </li>
+            </ol>
+        </div>
+
+        <!-- 6. Plan de Vía Aérea Fallida -->
+        <div class="mt-8 mb-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4">6. Plan de Vía Aérea Fallida</h2>
+            <div class="space-y-4">
+                <div>
+                    <span class="inline-flex items-center rounded-md bg-blue-700 px-3 py-1 text-lg font-bold text-blue-100">Plan A: Intubación Orotraqueal</span>
+                    <p class="text-sm text-gray-400 mt-2">Es el objetivo principal de la ISR. Si falla el primer intento, NO insista múltiples veces. Re-oxigene y considere el Plan B.</p>
+                </div>
+                <div>
+                    <span class="inline-flex items-center rounded-md bg-yellow-700 px-3 py-1 text-lg font-bold text-yellow-100">Plan B: Vía Aérea Supraglótica</span>
+                    <p class="text-sm text-gray-400 mt-2">Si el Plan A falla. Inserte un dispositivo supraglótico (ej. Mascarilla Laríngea) para asegurar la ventilación rápidamente. Es la principal estrategia de rescate.</p>
+                </div>
+                 <div>
+                    <span class="inline-flex items-center rounded-md bg-green-700 px-3 py-1 text-lg font-bold text-green-100">Plan C: Ventilación BVM</span>
+                    <p class="text-sm text-gray-400 mt-2">Si no se puede intubar (Plan A) ni colocar un supraglótico (Plan B), el objetivo inmediato es <strong class="text-white">ventilar al paciente</strong> con Bolsa-Mascarilla (Ambú) para re-oxigenar. Pida ayuda experta.</p>
+                </div>
+                <div>
+                    <span class="inline-flex items-center rounded-md bg-red-700 px-3 py-1 text-lg font-bold text-red-100">Plan D: Vía Aérea Quirúrgica</span>
+                    <p class="text-sm text-gray-400 mt-2">Escenario "No se puede intubar, no se puede ventilar" (CICO). Es el último recurso y debe realizarse de inmediato: <strong class="text-white">Cricotiroidotomía</strong>.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- **** FIRMA AÑADIDA **** -->
+        <footer class="mt-12 text-center pb-4">
+            <p class="text-lg text-gray-500 italic">Dr. Maluenda</p>
+        </footer>
+
+    </div> <!-- Fin de .container -->
+
+    <script>
+        const drugDatabase = {
+            standard: {
+                name: 'Paciente Estándar (Normotenso)',
+                objective: 'Objetivo: Inducción rápida y suave con recuperación predecible.',
+                steps: [
+                    {
+                        title: 'Paso 1: Pre-tratamiento', time_explained: '(3 min ANTES de Inducción)',
+                        options: [
+                            { name: 'Fentanilo', dose: [1, 2], unit: 'mcg/kg', type: 'pretreatment', presentation: 'Amp: 100 mcg / 2 ml', concentration: 50, prep_unit: 'ml' /* (mcg/ml) */ }
+                        ]
+                    },
+                    {
+                        title: 'Paso 2: Inducción', time_explained: '(AHORA)',
+                        options: [
+                            { name: 'Propofol', dose: [1.5, 2], unit: 'mg/kg', type: 'induction', presentation: 'Amp: 200 mg / 20 ml', concentration: 10, prep_unit: 'ml' /* (mg/ml) */ }
+                        ]
+                    },
+                    {
+                        title: 'Paso 3: Parálisis', time_explained: '(5 seg DESPUÉS de Inducción)',
+                        options: [
+                            { name: 'Succinilcolina', dose: [1.5, 1.5], unit: 'mg/kg', type: 'paralysis', presentation: 'Amp: 100 mg / 2 ml', concentration: 50, prep_unit: 'ml' /* (mg/ml) */ }
+                        ]
+                    }
+                ]
+            },
+            hemodynamic: {
+                name: 'Paciente con Inestabilidad Hemodinámica (Shock)',
+                objective: 'Objetivo: Lograr inconsciencia y parálisis con mínimo impacto cardiovascular.',
+                steps: [
+                    {
+                        title: 'Paso 1: Pre-tratamiento', time_explained: '(3 min ANTES de Inducción)',
+                        options: [
+                            { name: 'Fentanilo (Dosis Baja)', dose: [0.5, 0.5], unit: 'mcg/kg', type: 'pretreatment', note: 'Usar con extrema precaución.', presentation: 'Amp: 100 mcg / 2 ml', concentration: 50, prep_unit: 'ml' },
+                            { name: 'Omitir Pre-tto', dose: [0, 0], unit: 'mcg/kg', type: 'omit', note: 'Omitir en shock severo para evitar hipotensión.' }
+                        ]
+                    },
+                    {
+                        title: 'Paso 2: Inducción', time_explained: '(AHORA)',
+                        options: [
+                            { name: 'Etomidato', dose: [0.3, 0.3], unit: 'mg/kg', type: 'induction', presentation: 'Amp: 20 mg / 10 ml', concentration: 2, prep_unit: 'ml' },
+                            { name: 'Ketamina', dose: [1, 2], unit: 'mg/kg', type: 'induction', note: 'Alternativa. Ojo: puede estar contraindicada en shock cardiogénico.', presentation: 'Amp: 500 mg / 10 ml', concentration: 50, prep_unit: 'ml' }
+                        ]
+                    },
+                    {
+                        title: 'Paso 3: Parálisis', time_explained: '(5 seg DESPUÉS de Inducción)',
+                        options: [
+                            { name: 'Rocuronio', dose: [1.2, 1.2], unit: 'mg/kg', type: 'paralysis', note: 'Preferido para evitar bradicardia.', presentation: 'Amp: 50 mg / 5 ml', concentration: 10, prep_unit: 'ml' }
+                        ]
+                    }
+                ]
+            },
+            tce: {
+                name: 'Paciente con TCE y Sospecha de HIC',
+                objective: 'Objetivo: Asegurar vía aérea, prevenir aumento de PIC y mantener perfusión cerebral.',
+                steps: [
+                    {
+                        title: 'Paso 1: Neuroprotección', time_explained: '(3 min ANTES de Inducción)',
+                        options: [
+                            { name: 'Lidocaína', dose: [1.5, 1.5], unit: 'mg/kg', type: 'pretreatment', presentation: 'Amp (2%): 100 mg / 5 ml', concentration: 20, prep_unit: 'ml' }
+                        ]
+                    },
+                    {
+                        title: 'Paso 2: Simpatolisis', time_explained: '(3 min ANTES de Inducción)',
+                        options: [
+                            { name: 'Fentanilo', dose: [1, 2], unit: 'mcg/kg', type: 'pretreatment', presentation: 'Amp: 100 mcg / 2 ml', concentration: 50, prep_unit: 'ml' }
+                        ]
+                    },
+                    {
+                        title: 'Paso 3: Inducción', time_explained: '(AHORA)',
+                        options: [
+                            { name: 'Etomidato', dose: [0.3, 0.3], unit: 'mg/kg', type: 'induction', presentation: 'Amp: 20 mg / 10 ml', concentration: 2, prep_unit: 'ml' },
+                            { name: 'Propofol', dose: [1, 1.5], unit: 'mg/kg', type: 'induction', note: 'Solo si PA es estable o alta.', presentation: 'Amp: 200 mg / 20 ml', concentration: 10, prep_unit: 'ml' }
+                        ]
+                    },
+                    {
+                        title: 'Paso 4: Parálisis', time_explained: '(5 seg DESPUÉS de Inducción)',
+                        options: [
+                            { name: 'Rocuronio', dose: [1.2, 1.2], unit: 'mg/kg', type: 'paralysis', note: 'Preferido para evitar fasciculaciones.', presentation: 'Amp: 50 mg / 5 ml', concentration: 10, prep_unit: 'ml' }
+                        ]
+                    }
+                ]
+            },
+            bronchospasm: {
+                name: 'Paciente con Broncoespasmo Severo',
+                objective: 'Objetivo: Intubar al paciente promoviendo activamente la broncodilatación.',
+                steps: [
+                    {
+                        title: 'Paso 1: Reactividad Vía Aérea', time_explained: '(3 min ANTES de Inducción)',
+                        options: [
+                            { name: 'Lidocaína', dose: [1.5, 1.5], unit: 'mg/kg', type: 'pretreatment', presentation: 'Amp (2%): 100 mg / 5 ml', concentration: 20, prep_unit: 'ml' }
+                        ]
+                    },
+                    {
+                        title: 'Paso 2: Simpatolisis', time_explained: '(3 min ANTES de Inducción)',
+                        options: [
+                            { name: 'Fentanilo', dose: [1, 1], unit: 'mcg/kg', type: 'pretreatment', presentation: 'Amp: 100 mcg / 2 ml', concentration: 50, prep_unit: 'ml' }
+                        ]
+                    },
+                    {
+                        title: 'Paso 3: Inducción', time_explained: '(AHORA)',
+                        options: [
+                            { name: 'Ketamina', dose: [1, 2], unit: 'mg/kg', type: 'induction', note: 'Propiedades broncodilatadoras.', presentation: 'Amp: 500 mg / 10 ml', concentration: 50, prep_unit: 'ml' }
+                        ]
+                    },
+                    {
+                        title: 'Paso 4: Parálisis', time_explained: '(5 seg DESPUÉS de Inducción)',
+                        options: [
+                            { name: 'Rocuronio', dose: [1.2, 1.2], unit: 'mg/kg', type: 'paralysis', note: 'Evita liberación de histamina.', presentation: 'Amp: 50 mg / 5 ml', concentration: 10, prep_unit: 'ml' }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        // --- STATE ---
+        let currentWeight = 0;
+        let selectedOptions = {
+            standard: [0, 0, 0],
+            hemodynamic: [0, 0, 0],
+            tce: [0, 0, 0, 0],
+            bronchospasm: [0, 0, 0, 0]
+        };
+
+        // --- SELECTORS ---
+        const weightInput = document.getElementById('patient-weight');
+        const calculateBtn = document.getElementById('calculate-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const weightDisplay = document.getElementById('weight-display');
+        const tabsContainer = document.getElementById('scenario-tabs');
+        const scenariosContainer = document.getElementById('scenarios-container');
+
+        // --- FUNCTIONS ---
+
+        /**
+         * Construye el HTML inicial para todos los escenarios, pasos y opciones.
+         * Se llama una sola vez al cargar la página.
+         */
+        function renderScenarioUI() {
+            for (const scenarioName in drugDatabase) {
+                const scenario = drugDatabase[scenarioName];
+                const stepsContainer = document.getElementById(`${scenarioName}-steps-container`);
+                
+                // **** FIX: Añadida comprobación de nulidad ****
+                const nameEl = document.getElementById(`${scenarioName}-name`);
+                const objectiveEl = document.getElementById(`${scenarioName}-objective`);
+
+                if (nameEl) {
+                    nameEl.textContent = scenario.name;
+                }
+                if (objectiveEl) {
+                    objectiveEl.textContent = scenario.objective;
+                }
+                // **** FIN FIX ****
+
+                if (!stepsContainer) continue;
+
+                let stepsHtml = '';
+                scenario.steps.forEach((step, stepIndex) => {
+                    // Botones de opciones
+                    const optionButtonsHtml = step.options.map((option, optionIndex) => {
+                        // Comprobar si selectedOptions[scenarioName] existe
+                        if (!selectedOptions[scenarioName]) {
+                            // console.warn(`selectedOptions['${scenarioName}'] no está inicializado. Inicializando.`);
+                            initializeState(); // Re-inicializar si algo salió mal
+                        }
+                        const isActive = optionIndex === selectedOptions[scenarioName][stepIndex];
+                        return `<button class="drug-option-btn ${isActive ? 'active' : ''}" 
+                                    data-scenario="${scenarioName}" 
+                                    data-step-index="${stepIndex}" 
+                                    data-option-index="${optionIndex}">
+                                ${option.name}
+                            </button>`;
+                    }).join('');
+
+                    // Tarjeta de detalles (se llenará después)
+                    stepsHtml += `
+                        <div class="bg-gray-800 rounded-2xl shadow-lg p-4 md:p-6 mb-6">
+                            <div class="step-header">
+                                <h3 class="step-title">${step.title}</h3>
+                                <span class="step-time-explained">${step.time_explained}</span>
+                            </div>
+                            <div class="option-buttons">${optionButtonsHtml}</div>
+                            <div class="drug-details-card" id="details-${scenarioName}-${stepIndex}">
+                                <!-- El contenido se inyectará dinámicamente -->
+                            </div>
+                        </div>
+                    `;
+                });
+                stepsContainer.innerHTML = stepsHtml;
+            }
+        }
+
+        /**
+         * Actualiza TODAS las tarjetas de detalles de fármacos con los cálculos de peso.
+         */
+        function updateAllCalculations() {
+            for (const scenarioName in drugDatabase) {
+                // Asegurarse de que el escenario exista en el estado
+                if (selectedOptions[scenarioName]) {
+                    drugDatabase[scenarioName].steps.forEach((step, stepIndex) => {
+                        updateSingleDrugCard(scenarioName, stepIndex);
+                    });
+                } else {
+                    // console.warn(`Saltando cálculos para escenario no inicializado: ${scenarioName}`);
+                }
+            }
+        }
+
+        /**
+         * Actualiza una sola tarjeta de detalles de fármaco.
+         * Esta es la función principal de cálculo y renderizado.
+         */
+        function updateSingleDrugCard(scenarioName, stepIndex) {
+            // Asegurarse de que el índice de opción exista para este escenario/paso
+            if (!selectedOptions[scenarioName] || selectedOptions[scenarioName][stepIndex] === undefined) {
+                // console.warn(`Estado no inicializado para ${scenarioName}, paso ${stepIndex}`);
+                if (selectedOptions[scenarioName]) {
+                     selectedOptions[scenarioName][stepIndex] = 0; // Inicializar si falta
+                } else {
+                    // console.error(`El escenario ${scenarioName} no existe en el estado.`);
+                    return; // No se puede continuar si el escenario no existe
+                }
+            }
+            
+            const optionIndex = selectedOptions[scenarioName][stepIndex];
+            
+            if (!drugDatabase[scenarioName] || !drugDatabase[scenarioName].steps[stepIndex] || !drugDatabase[scenarioName].steps[stepIndex].options[optionIndex]) {
+                // console.error(`Datos no encontrados para ${scenarioName}, paso ${stepIndex}, opción ${optionIndex}`);
+                return; // Salir si los datos no existen
+            }
+
+            const drug = drugDatabase[scenarioName].steps[stepIndex].options[optionIndex];
+            const card = document.getElementById(`details-${scenarioName}-${stepIndex}`);
+            
+            if (!drug || !card) return;
+
+            card.className = `drug-details-card ${drug.type}`; // Actualiza el color del borde
+
+            // Caso 1: Fármaco omitido
+            if (drug.dose[0] === 0 && drug.dose[1] === 0) {
+                card.innerHTML = `<p class="text-lg font-bold text-gray-400">Omitido</p><p class="text-sm text-gray-500">${drug.note || ''}</p>`;
+                return;
+            }
+
+            // Caso 2: Sin peso ingresado
+            if (currentWeight <= 0) {
+                card.innerHTML = `<p class="text-lg font-bold dose-placeholder">Ingrese peso para calcular</p>`;
+                return;
+            }
+
+            // Caso 3: Calcular dosis
+            const doseMin_mg = (drug.dose[0] * currentWeight).toFixed(1);
+            const doseMax_mg = (drug.dose[1] * currentWeight).toFixed(1);
+            const dose_unit = drug.unit.replace('/kg', '');
+            const doseRange_mg = doseMin_mg === doseMax_mg ? `${doseMin_mg} ${dose_unit}` : `${doseMin_mg} - ${doseMax_mg} ${dose_unit}`;
+            
+            let prepHtml = '';
+            if (drug.concentration) {
+                const prepMin_ml = (doseMin_mg / drug.concentration).toFixed(1);
+                const prepMax_ml = (doseMax_mg / drug.concentration).toFixed(1);
+                const prepRange_ml = prepMin_ml === prepMax_ml ? `${prepMin_ml} ${drug.prep_unit}` : `${prepMin_ml} - ${prepMax_ml} ${drug.prep_unit}`;
+
+                prepHtml = `
+                    <div class="detail-item">
+                        <h4>Preparación (Cargar)</h4>
+                        <p class="dose-ml">${prepRange_ml}</p>
+                    </div>
+                `;
+            }
+
+            const formula = `(${drug.dose[0]}${drug.dose[1] !== drug.dose[0] ? '-' + drug.dose[1] : ''} ${drug.unit} * ${currentWeight} kg)`;
+            const noteHtml = drug.note ? `<p class="text-sm text-gray-500 col-span-1 md:col-span-3 mt-2">${drug.note}</p>` : '';
+
+            card.innerHTML = `
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <h4>Dosis (Peso)</h4>
+                        <p class="dose-mg">${doseRange_mg}</p>
+                    </div>
+                    ${prepHtml}
+                    <div class="detail-item">
+                        <h4>Presentación</h4>
+                        <p class="text-base text-gray-300">${drug.presentation || 'N/A'}</p>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2 font-mono">Cálculo: ${formula}</p>
+                ${noteHtml}
+            `;
+        }
+        
+        // --- EVENT HANDLERS ---
+
+        function handleCalculate() {
+            const weight = parseFloat(weightInput.value);
+            if (weight > 0) {
+                currentWeight = weight;
+                weightDisplay.textContent = `Dosis calculadas para un paciente de ${currentWeight} kg.`;
+                weightDisplay.classList.remove('text-red-400');
+                weightDisplay.classList.add('text-green-400');
+            } else {
+                currentWeight = 0;
+                weightDisplay.textContent = 'Por favor, ingrese un peso válido.';
+                weightDisplay.classList.remove('text-green-400');
+                weightDisplay.classList.add('text-red-400');
+            }
+            updateAllCalculations();
+        }
+
+        function handleClear() {
+            currentWeight = 0;
+            weightInput.value = '';
+            weightDisplay.textContent = '';
+            weightDisplay.classList.remove('text-red-400');
+            weightDisplay.classList.add('text-green-400');
+            updateAllCalculations();
+            weightInput.focus();
+        }
+
+        function handleOptionClick(event) {
+            const button = event.target.closest('.drug-option-btn');
+            if (!button) return;
+
+            const { scenario, stepIndex, optionIndex } = button.dataset;
+            
+            // Actualizar estado
+            if (selectedOptions[scenario]) {
+                selectedOptions[scenario][stepIndex] = parseInt(optionIndex, 10);
+            } else {
+                // console.error(`Escenario no encontrado en el estado: ${scenario}`);
+                return;
+            }
+
+            // Actualizar UI de botones (quitar 'active' de hermanos, poner 'active' en el clickeado)
+            const buttonGroup = button.parentElement;
+            buttonGroup.querySelectorAll('.drug-option-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+            
+            // Actualizar solo la tarjeta de detalles afectada
+            updateSingleDrugCard(scenario, parseInt(stepIndex, 10));
+        }
+
+        function switchTab(event) {
+            const targetButton = event.target.closest('.tab-button');
+            if (!targetButton) return;
+
+            tabsContainer.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('tab-active');
+                button.classList.add('tab-inactive');
+            });
+            targetButton.classList.add('tab-active');
+            targetButton.classList.remove('tab-inactive');
+            
+            const targetScenario = targetButton.dataset.scenario;
+            scenariosContainer.querySelectorAll('.scenario-card').forEach(card => card.classList.remove('active'));
+            document.getElementById(targetScenario).classList.add('active');
+        }
+
+        // --- INITIALIZATION ---
+        
+        // Inicializar el estado de selectedOptions basado en la base de datos para evitar errores
+        function initializeState() {
+            for (const scenarioName in drugDatabase) {
+                selectedOptions[scenarioName] = drugDatabase[scenarioName].steps.map(() => 0); // Default to the first option (index 0)
+            }
+        }
+
+        calculateBtn.addEventListener('click', handleCalculate);
+        clearBtn.addEventListener('click', handleClear);
+        tabsContainer.addEventListener('click', switchTab);
+        scenariosContainer.addEventListener('click', handleOptionClick);
+        
+        weightInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                handleCalculate();
+            }
+        });
+
+        // Construir la UI inicial y luego popular los cálculos (que mostrarán "Ingrese peso")
+        initializeState();
+        renderScenarioUI();
+        updateAllCalculations();
+        
+    </script>
+
+</body>
+</html>
