@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Asistente ISR - Hospital Ilia</title>
+    
+    <!-- Metaetiquetas para PWA -->
+    <meta name="theme-color" content="#4f46e5"/>
+    <link rel="apple-touch-icon" href="https://placehold.co/180x180/4f46e5/ffffff?text=ISR">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://placehold.co/32x32/4f46e5/ffffff?text=I">
+    <link rel="manifest" href="manifest.json">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -220,7 +227,7 @@
                     <h3 class="font-bold text-lg text-gray-300">M<span class="text-indigo-400">onitoring</span> (Monitorización)</h3>
                     <div class="checklist-item"><input id="c15" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c15" class="ml-2">Monitor cardíaco / EKG</label></div>
                     <div class="checklist-item"><input id="c16" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c16" class="ml-2">Presión arterial no invasiva</label></div>
-                    <div class="checklist-item"><input id="c17" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c17" class="ml-2">Pulsioximetría</Glabel></div>
+                    <div class="checklist-item"><input id="c17" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c17" class="ml-2">Pulsioximetría</label></div>
                     <div class="checklist-item"><input id="c18" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c18" class="ml-2">Capnografía (EtCO₂)</label></div>
                 </div>
                 <!-- E -->
@@ -657,7 +664,7 @@
                         stepsHtml += `
                             <div class="wait-block wait-block-yellow">
                                 <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                <span>AHORA ESPERE 3 MINUTOS MIENTRAS ACTÚA EL PRE-TRATAMIENTO</span>
+                                <span>AHORA ESPERE 3 MINUTOS MIENTRAS ACTÚA EL PRE-TRATAMENTO</span>
                             </div>
                         `;
                     }
@@ -875,6 +882,19 @@
         initializeState();
         renderScenarioUI();
         updateAllCalculations();
+        
+        // --- SCRIPT DE REGISTRO DEL SERVICE WORKER ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+              navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                  console.log('ServiceWorker registrado con éxito: ', registration.scope);
+                })
+                .catch(error => {
+                  console.log('Fallo en el registro del ServiceWorker: ', error);
+                });
+            });
+        }
         
     </script>
 
