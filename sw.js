@@ -4,7 +4,8 @@ const ASSETS_TO_CACHE = [
   'index.html',
   'manifest.json',
   'https://cdn.tailwindcss.com',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'
+  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+  'guia_intubacion.mp4' // <-- AÑADIDO: El video para el caché offline
 ];
 
 // Evento de Instalación: Guarda los archivos en caché
