@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Título de la pestaña del navegador -->
     <title>Asistente ISR - Hospital Ilia</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -11,15 +10,24 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+        
+        /* Estilo Pestañas de Escenario Y Botones de Fármaco */
         .tab-active {
             border-color: #4f46e5;
             color: #e0e7ff;
             background-color: #4f46e5;
+            font-weight: 600;
         }
         .tab-inactive {
-            border-color: #4b5563;
-            color: #d1d5db;
+            border-color: #4b5563; /* border-gray-600 */
+            color: #d1d5db; /* text-gray-300 */
+            font-weight: 600;
         }
+        .tab-inactive:hover {
+            background-color: #374151; /* bg-gray-700 */
+            border-color: #6b7280; /* border-gray-500 */
+        }
+        
         .scenario-card {
             display: none;
         }
@@ -31,7 +39,6 @@
             color: #6b7280;
         }
 
-        /* Estilos V5: Estética simple + Timeline */
         .step-header {
             @apply flex justify-between items-baseline mb-3 border-b border-gray-700 pb-2;
         }
@@ -45,19 +52,14 @@
         .option-buttons {
             @apply flex flex-wrap gap-2 mb-3;
         }
-        .drug-option-btn {
-            @apply bg-gray-600 text-gray-200 py-2 px-4 rounded-lg transition-colors duration-200 border-2 border-gray-600 text-sm;
-        }
-        .drug-option-btn.active {
-            @apply bg-indigo-700 text-white border-indigo-500 shadow-md;
-        }
-        .drug-option-btn:not(.active):hover {
-            @apply bg-gray-500;
+        
+        /* Contenedor de Fármacos */
+        .drug-step-container {
+             @apply bg-gray-800 rounded-2xl shadow-lg p-4 md:p-6 mb-6;
         }
         
-        /* La tarjeta de detalles es ahora el contenedor principal */
         .drug-details-card {
-            @apply bg-gray-700 p-4 rounded-lg; /* Tarjeta anidada, sin sombra ni margen */
+            @apply bg-gray-700 p-4 rounded-lg;
             border-left-width: 4px;
         }
         .pretreatment { border-left-color: #f59e0b; }
@@ -71,19 +73,9 @@
         .detail-item h4 {
             @apply text-sm font-semibold text-gray-400 uppercase tracking-wider;
         }
-        /* Eliminamos la regla general conflictiva '.detail-item p' que estaba aquí */
-
-        /* Reglas más específicas para anular el color de texto por defecto */
-        /* **** FIX: Añadido !important para forzar el color verde **** */
-        .detail-item .dose-mg {
-            @apply text-green-400 !important font-bold text-lg; 
-        }
-        .detail-item .dose-ml {
-            @apply text-green-400 !important font-bold text-lg;
-        }
-
+        
         .dose-placeholder {
-            @apply text-yellow-500;
+            @apply text-lg font-bold text-yellow-500;
         }
 
         /* Línea de tiempo visual */
@@ -108,12 +100,61 @@
         .timeline-label { @apply text-sm font-semibold mt-2; }
         .timeline-time { @apply text-xs text-gray-400; }
 
+        /* Estilo para los bloques de espera didácticos */
+        .wait-block {
+            @apply flex items-center justify-center text-center gap-3 my-4 p-4 bg-gray-900 rounded-lg border-2 border-dashed;
+        }
+        .wait-block-yellow {
+             @apply border-yellow-500;
+        }
+         .wait-block-yellow span {
+            @apply text-lg font-semibold text-yellow-400;
+        }
+        .wait-block-yellow svg {
+            @apply text-yellow-400 animate-pulse;
+        }
+        
+        .wait-block-pink {
+             @apply border-pink-500;
+        }
+         .wait-block-pink span {
+            @apply text-lg font-semibold text-pink-400;
+        }
+        .wait-block-pink svg {
+            @apply text-pink-400 animate-pulse;
+        }
+
+        /* Estilos para la mnemotecnia DOPE */
+        .dope-item {
+            @apply flex items-start gap-3 p-3 bg-gray-800 rounded-lg;
+        }
+        .dope-letter {
+            @apply flex-shrink-0 w-10 h-10 rounded-full bg-indigo-600 text-white font-bold text-xl flex items-center justify-center;
+        }
+        .dope-content h5 {
+            @apply font-semibold text-gray-100;
+        }
+        .dope-content p {
+            @apply text-sm text-gray-400;
+        }
+        
+        /* Disclaimer */
+        .disclaimer-box {
+            @apply mt-10 pt-4 border-t border-gray-700 text-center;
+        }
+        .disclaimer-box h5 {
+            @apply text-sm font-semibold text-yellow-500 uppercase;
+        }
+        .disclaimer-box p {
+            @apply text-xs text-gray-500 italic;
+        }
+
     </style>
 </head>
 <body class="bg-gray-900 text-gray-200 antialiased">
 
     <div class="container mx-auto p-4 md:p-8 max-w-5xl">
-        <!-- **** TÍTULO MODIFICADO **** -->
+        <!-- Título -->
         <header class="text-center mb-8">
              <div class="flex items-center justify-center gap-4">
                 <svg class="w-10 h-10 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -124,11 +165,10 @@
             <p class="mt-2 text-2xl text-indigo-300">- Asistente de Crisis -</p>
             <p class="mt-2 text-lg text-gray-400">Hospital Ilia</p>
         </header>
-        <!-- **** FIN TÍTULO MODIFICADO **** -->
 
-        <!-- 1. Peso -->
+        <!-- Peso -->
         <div class="mb-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
-            <label for="patient-weight" class="block text-lg font-semibold text-gray-300 mb-2">1. Peso del Paciente (kg)</label>
+            <label for="patient-weight" class="block text-lg font-semibold text-gray-300 mb-2">Peso del Paciente (kg)</label>
             <div class="flex items-center gap-4">
                 <input type="number" id="patient-weight" placeholder="Ej: 70" class="w-full bg-gray-700 text-white rounded-lg border-2 border-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 p-3 text-lg transition-all duration-300">
                 <button id="calculate-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-5 rounded-lg transition-colors whitespace-nowrap">
@@ -141,9 +181,9 @@
             <p id="weight-display" class="text-sm text-green-400 mt-2 h-5"></p>
         </div>
 
-        <!-- 2. Checklist -->
+        <!-- Paso 1: Preparación (Checklist) -->
         <div class="mb-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
-            <h2 class="text-2xl font-bold text-indigo-400 mb-4">2. Checklist de Preparación (SOAPME)</h2>
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4"><span class="text-gray-500 font-normal">Paso 1:</span> Checklist de Preparación (SOAPME)</h2>
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 text-sm">
                 <!-- S -->
                 <div class="space-y-2">
@@ -180,7 +220,7 @@
                     <h3 class="font-bold text-lg text-gray-300">M<span class="text-indigo-400">onitoring</span> (Monitorización)</h3>
                     <div class="checklist-item"><input id="c15" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c15" class="ml-2">Monitor cardíaco / EKG</label></div>
                     <div class="checklist-item"><input id="c16" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c16" class="ml-2">Presión arterial no invasiva</label></div>
-                    <div class="checklist-item"><input id="c17" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c17" class="ml-2">Pulsioximetría</label></div>
+                    <div class="checklist-item"><input id="c17" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c17" class="ml-2">Pulsioximetría</Glabel></div>
                     <div class="checklist-item"><input id="c18" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c18" class="ml-2">Capnografía (EtCO₂)</label></div>
                 </div>
                 <!-- E -->
@@ -192,9 +232,9 @@
             </div>
         </div>
 
-        <!-- 3. Dispositivos -->
+        <!-- Paso 2: Dispositivos -->
         <div class="mb-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
-            <h2 class="text-2xl font-bold text-indigo-400 mb-4">3. Selección de Dispositivos</h2>
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4"><span class="text-gray-500 font-normal">Paso 2:</span> Selección de Dispositivos</h2>
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Tubo IOT -->
                 <div>
@@ -253,12 +293,28 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Paso 3: Pre-oxigenación -->
+        <div class="mb-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4"><span class="text-gray-500 font-normal">Paso 3:</span> Pre-oxigenación</h2>
+            <div class="flex items-start gap-4 p-4 bg-gray-700 rounded-lg">
+                <!-- Icono de Reloj -->
+                <svg class="w-10 h-10 text-indigo-300 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-100">Administrar O₂ al 100% (FiO₂) durante 3-5 minutos.</h3>
+                    <p class="text-gray-400">Objetivo: Desnitrogenar los pulmones para crear un reservorio de oxígeno. Esto le da <strong class="text-white">varios minutos de apnea segura</strong> antes de la desaturación.</p>
+                    <p class="text-sm text-yellow-300 mt-2">No quite la mascarilla de O₂ hasta el momento exacto de la laringoscopia.</p>
+                </div>
+            </div>
+        </div>
 
-        <!-- 4. Dosis -->
+        <!-- Paso 4: Dosis -->
         <div>
-            <h2 class="text-2xl font-bold text-indigo-400 mb-4 text-center">4. Cálculo de Dosis por Escenario Clínico</h2>
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4 text-center"><span class="text-gray-500 font-normal">Paso 4:</span> Cálculo de Dosis (Farmacología)</h2>
             
-            <!-- NUEVA Línea de Tiempo Visual -->
+            <!-- Línea de Tiempo Visual -->
             <div class="timeline">
                 <div class="timeline-step timeline-step-1">
                     <div class="timeline-dot"></div>
@@ -282,10 +338,10 @@
             <!-- Tabs de Escenarios -->
             <div class="mb-6">
                 <nav class="flex flex-wrap justify-center gap-2 md:gap-4" id="scenario-tabs">
-                    <button data-scenario="standard" class="tab-button tab-active text-sm md:text-base font-semibold py-2 px-4 rounded-lg border-2 transition-all duration-300">Paciente Estándar</button>
-                    <button data-scenario="hemodynamic" class="tab-button tab-inactive text-sm md:text-base font-semibold py-2 px-4 rounded-lg border-2 transition-all duration-300">Inestabilidad Hemodinámica</button>
-                    <button data-scenario="tce" class="tab-button tab-inactive text-sm md:text-base font-semibold py-2 px-4 rounded-lg border-2 transition-all duration-300">TCE / HIC</button>
-                    <button data-scenario="bronchospasm" class="tab-button tab-inactive text-sm md:text-base font-semibold py-2 px-4 rounded-lg border-2 transition-all duration-300">Broncoespasmo Severo</button>
+                    <button data-scenario="standard" class="tab-button tab-active text-sm md:text-base py-2 px-4 rounded-lg border-2 transition-all duration-300">Paciente Estándar</button>
+                    <button data-scenario="hemodynamic" class="tab-button tab-inactive text-sm md:text-base py-2 px-4 rounded-lg border-2 transition-all duration-300">Inestabilidad Hemodinámica</button>
+                    <button data-scenario="tce" class="tab-button tab-inactive text-sm md:text-base py-2 px-4 rounded-lg border-2 transition-all duration-300">TCE / HIC</button>
+                    <button data-scenario="bronchospasm" class="tab-button tab-inactive text-sm md:text-base py-2 px-4 rounded-lg border-2 transition-all duration-300">Broncoespasmo Severo</button>
                 </nav>
             </div>
 
@@ -310,7 +366,6 @@
                     <div class="space-y-0" id="tce-steps-container"></div>
                 </div>
                 <!-- Escenario Broncoespasmo -->
-                <!-- **** FIX: Corregidos los IDs 'bronchasm-name' y 'bronchasm-objective' **** -->
                 <div id="bronchospasm" class="scenario-card">
                      <h3 class="text-2xl font-bold text-gray-200 mb-2" id="bronchospasm-name"></h3>
                     <p class="text-gray-400 mb-6" id="bronchospasm-objective"></p>
@@ -319,28 +374,67 @@
             </div>
         </div>
 
-        <!-- 5. Procedimiento Post-Parálisis -->
+        <!-- Paso 5: Procedimiento Post-Parálisis -->
         <div class="mt-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
-            <h2 class="text-2xl font-bold text-indigo-400 mb-4">5. Procedimiento Post-Parálisis</h2>
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4"><span class="text-gray-500 font-normal">Paso 5:</span> Posicionamiento y Procedimiento</h2>
             <ol class="list-decimal list-inside space-y-4 text-gray-300">
                 <li>
                     <strong class="font-semibold text-gray-100">Posicionamiento y Protección:</strong>
                     <p class="text-sm text-gray-400 ml-5">Mientras los fármacos actúan (~45-60s), optimice la posición. Use la "posición de olfateo" (cabeza elevada) o "rampa" en pacientes obesos. Considere la maniobra BURP para mejorar la visualización laríngea.</p>
                 </li>
                 <li>
-                    <strong class="font-semibold text-gray-100">Paso del Tubo:</strong>
+                    <strong class="font-semibold text-gray-100">Paso del Tubo (Laringoscopia):</strong>
                     <p class="text-sm text-gray-400 ml-5">Con relajación muscular completa, realice la laringoscopia. Visualice las cuerdas vocales e inserte el tubo endotraqueal. Retire la guía e infle el neumotaponador.</p>
                 </li>
                 <li>
                     <strong class="font-semibold text-gray-100">Manejo Post-Intubación (Confirmación):</strong>
-                    <p class="text-sm text-gray-400 ml-5">El paso más crítico. Confirme la posición con <strong class="text-yellow-300">Capnografía de Onda (EtCO₂)</strong> (Gold Standard). Ausculte y asegure el tubo. Inicie sedación continua y evalúe con la mnemotecnia DOPE si hay deterioro (Desplazamiento, Obstrucción, Pneumotórax, Equipo).</p>
+                    <p class="text-sm text-gray-400 ml-5">El paso más crítico. Confirme la posición con <strong class="text-yellow-300">Capnografía de Onda (EtCO₂)</strong> (Gold Standard). Ausculte y asegure el tubo. Inicie sedación continua.</p>
+                    
+                    <!-- DOPE Mnemonic Desarrollado -->
+                    <div class="bg-gray-700 p-4 rounded-lg mt-4 ml-5">
+                        <h4 class="font-semibold text-yellow-300 mb-3">Si hay deterioro súbito, evalúe (DOPE):</h4>
+                        <div class="space-y-3">
+                            <!-- D -->
+                            <div class="dope-item">
+                                <div class="dope-letter">D</div>
+                                <div class="dope-content">
+                                    <h5>Displacement (Desplazamiento)</h5>
+                                    <p>¿Se movió el tubo? (ej. extubación, intubación bronquial derecha). Re-evaluar profundidad y auscultar.</p>
+                                </div>
+                            </div>
+                            <!-- O -->
+                            <div class="dope-item">
+                                <div class="dope-letter">O</div>
+                                <div class="dope-content">
+                                    <h5>Obstruction (Obstrucción)</h5>
+                                    <p>¿Está el tubo tapado? (secreciones, sangre, acodamiento). Intentar aspirar con sonda.</p>
+                                </div>
+                            </div>
+                            <!-- P -->
+                            <div class="dope-item">
+                                <div class="dope-letter">P</div>
+                                <div class="dope-content">
+                                    <h5>Pneumothorax (Neumotórax)</h5>
+                                    <p>¿Pulmón colapsado? (especialmente a tensión). Auscultar, percutir, confirmar con ecografía o Rx.</p>
+                                </div>
+                            </div>
+                            <!-- E -->
+                            <div class="dope-item">
+                                <div class="dope-letter">E</div>
+                                <div class="dope-content">
+                                    <h5>Equipment (Equipo)</h5>
+                                    <p>¿Falló el ventilador? ¿Está desconectado? ¿Se acabó el oxígeno? Revisar circuito desde el paciente hasta la máquina.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </li>
             </ol>
         </div>
 
-        <!-- 6. Plan de Vía Aérea Fallida -->
+        <!-- Paso 6: Plan de Vía Aérea Fallida -->
         <div class="mt-8 mb-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
-            <h2 class="text-2xl font-bold text-indigo-400 mb-4">6. Plan de Vía Aérea Fallida</h2>
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4"><span class="text-gray-500 font-normal">Paso 6:</span> Plan de Vía Aérea Fallida</h2>
             <div class="space-y-4">
                 <div>
                     <span class="inline-flex items-center rounded-md bg-blue-700 px-3 py-1 text-lg font-bold text-blue-100">Plan A: Intubación Orotraqueal</span>
@@ -361,35 +455,45 @@
             </div>
         </div>
 
-        <!-- **** FIRMA AÑADIDA **** -->
+        <!-- Footer: Firma y Disclaimer -->
         <footer class="mt-12 text-center pb-4">
             <p class="text-lg text-gray-500 italic">Dr. Maluenda</p>
+            
+            <div class="disclaimer-box">
+                <h5>Descargo de Responsabilidad</h5>
+                <p>Esta aplicación es una herramienta de apoyo y referencia rápida. No reemplaza el juicio clínico profesional.</p>
+                <p>Las dosis y protocolos deben ser verificados por personal calificado antes de su administración. El autor no se hace responsable por errores u omisiones.</p>
+            </div>
         </footer>
 
     </div> <!-- Fin de .container -->
 
     <script>
+        // **** BASE DE DATOS DE FÁRMACOS ****
         const drugDatabase = {
             standard: {
                 name: 'Paciente Estándar (Normotenso)',
                 objective: 'Objetivo: Inducción rápida y suave con recuperación predecible.',
                 steps: [
                     {
-                        title: 'Paso 1: Pre-tratamiento', time_explained: '(3 min ANTES de Inducción)',
+                        title: 'Paso 4.1: Pre-tratamiento', time_explained: '(3 min ANTES de Inducción)',
                         options: [
-                            { name: 'Fentanilo', dose: [1, 2], unit: 'mcg/kg', type: 'pretreatment', presentation: 'Amp: 100 mcg / 2 ml', concentration: 50, prep_unit: 'ml' /* (mcg/ml) */ }
+                            { name: 'Fentanilo', dose: [1, 2], unit: 'mcg/kg', type: 'pretreatment', suitability: 'optimal', warning: null, presentation: 'Amp: 100 mcg / 2 ml', concentration: 50, prep_unit: 'ml' }
                         ]
                     },
                     {
-                        title: 'Paso 2: Inducción', time_explained: '(AHORA)',
+                        title: 'Paso 4.2: Inducción', time_explained: '(AHORA)',
                         options: [
-                            { name: 'Propofol', dose: [1.5, 2], unit: 'mg/kg', type: 'induction', presentation: 'Amp: 200 mg / 20 ml', concentration: 10, prep_unit: 'ml' /* (mg/ml) */ }
+                            { name: 'Propofol', dose: [1.5, 2], unit: 'mg/kg', type: 'induction', suitability: 'optimal', warning: null, presentation: 'Amp: 200 mg / 20 ml', concentration: 10, prep_unit: 'ml' },
+                            { name: 'Etomidato', dose: [0.3, 0.3], unit: 'mg/kg', type: 'induction', suitability: 'caution', warning: 'Fármaco seguro, pero puede causar supresión adrenal. No es 1ra línea si hay Propofol.', presentation: 'Amp: 20 mg / 10 ml', concentration: 2, prep_unit: 'ml' },
+                            { name: 'Ketamina', dose: [1, 2], unit: 'mg/kg', type: 'induction', suitability: 'caution', warning: 'Fármaco seguro, pero puede causar delirio de emergencia en algunos pacientes.', presentation: 'Amp: 500 mg / 10 ml', concentration: 50, prep_unit: 'ml' }
                         ]
                     },
                     {
-                        title: 'Paso 3: Parálisis', time_explained: '(5 seg DESPUÉS de Inducción)',
+                        title: 'Paso 4.3: Parálisis', time_explained: '(5 seg DESPUÉS de Inducción)',
                         options: [
-                            { name: 'Succinilcolina', dose: [1.5, 1.5], unit: 'mg/kg', type: 'paralysis', presentation: 'Amp: 100 mg / 2 ml', concentration: 50, prep_unit: 'ml' /* (mg/ml) */ }
+                            { name: 'Succinilcolina', dose: [1.5, 1.5], unit: 'mg/kg', type: 'paralysis', suitability: 'optimal', warning: '¡Chequear contraindicaciones! (Hiperkalemia, Quemados, ACV, etc.)', presentation: 'Amp: 100 mg / 2 ml', concentration: 50, prep_unit: 'ml' },
+                            { name: 'Rocuronio', dose: [1.2, 1.2], unit: 'mg/kg', type: 'paralysis', suitability: 'caution', warning: 'Opción segura si Succinilcolina está contraindicada. Su duración es más larga (30-40 min).', presentation: 'Amp: 50 mg / 5 ml', concentration: 10, prep_unit: 'ml' }
                         ]
                     }
                 ]
@@ -399,23 +503,25 @@
                 objective: 'Objetivo: Lograr inconsciencia y parálisis con mínimo impacto cardiovascular.',
                 steps: [
                     {
-                        title: 'Paso 1: Pre-tratamiento', time_explained: '(3 min ANTES de Inducción)',
+                        title: 'Paso 4.1: Pre-tratamiento', time_explained: '(3 min ANTES de Inducción)',
                         options: [
-                            { name: 'Fentanilo (Dosis Baja)', dose: [0.5, 0.5], unit: 'mcg/kg', type: 'pretreatment', note: 'Usar con extrema precaución.', presentation: 'Amp: 100 mcg / 2 ml', concentration: 50, prep_unit: 'ml' },
-                            { name: 'Omitir Pre-tto', dose: [0, 0], unit: 'mcg/kg', type: 'omit', note: 'Omitir en shock severo para evitar hipotensión.' }
+                            { name: 'Omitir Pre-tto', dose: [0, 0], unit: 'mcg/kg', type: 'omit', suitability: 'optimal', warning: null, note: 'Omitir en shock severo para evitar hipotensión.' },
+                            { name: 'Fentanilo (Dosis Baja)', dose: [0.5, 0.5], unit: 'mcg/kg', type: 'pretreatment', suitability: 'caution', warning: 'Usar con extrema precaución. Puede empeorar la hipotensión.', presentation: 'Amp: 100 mcg / 2 ml', concentration: 50, prep_unit: 'ml' }
                         ]
                     },
                     {
-                        title: 'Paso 2: Inducción', time_explained: '(AHORA)',
+                        title: 'Paso 4.2: Inducción', time_explained: '(AHORA)',
                         options: [
-                            { name: 'Etomidato', dose: [0.3, 0.3], unit: 'mg/kg', type: 'induction', presentation: 'Amp: 20 mg / 10 ml', concentration: 2, prep_unit: 'ml' },
-                            { name: 'Ketamina', dose: [1, 2], unit: 'mg/kg', type: 'induction', note: 'Alternativa. Ojo: puede estar contraindicada en shock cardiogénico.', presentation: 'Amp: 500 mg / 10 ml', concentration: 50, prep_unit: 'ml' }
+                            { name: 'Etomidato', dose: [0.3, 0.3], unit: 'mg/kg', type: 'induction', suitability: 'optimal', warning: 'El agente de inducción más hemodinámicamente neutro.', presentation: 'Amp: 20 mg / 10 ml', concentration: 2, prep_unit: 'ml' },
+                            { name: 'Ketamina', dose: [1, 2], unit: 'mg/kg', type: 'induction', suitability: 'optimal', warning: 'Excelente alternativa. Aumenta la PA y FC. (Evitar en shock cardiogénico).', presentation: 'Amp: 500 mg / 10 ml', concentration: 50, prep_unit: 'ml' },
+                            { name: 'Propofol', dose: [1.5, 2], unit: 'mg/kg', type: 'induction', suitability: 'danger', warning: '¡ALERTA! El Propofol es un potente vasodilatador y depresor miocárdico. Está CONTRAINDICADO en pacientes en shock.', presentation: 'Amp: 200 mg / 20 ml', concentration: 10, prep_unit: 'ml' }
                         ]
                     },
                     {
-                        title: 'Paso 3: Parálisis', time_explained: '(5 seg DESPUÉS de Inducción)',
+                        title: 'Paso 4.3: Parálisis', time_explained: '(5 seg DESPUÉS de Inducción)',
                         options: [
-                            { name: 'Rocuronio', dose: [1.2, 1.2], unit: 'mg/kg', type: 'paralysis', note: 'Preferido para evitar bradicardia.', presentation: 'Amp: 50 mg / 5 ml', concentration: 10, prep_unit: 'ml' }
+                            { name: 'Rocuronio', dose: [1.2, 1.2], unit: 'mg/kg', type: 'paralysis', suitability: 'optimal', warning: 'Preferido para evitar la bradicardia vagal que puede inducir la Succinilcolina.', presentation: 'Amp: 50 mg / 5 ml', concentration: 10, prep_unit: 'ml' },
+                            { name: 'Succinilcolina', dose: [1.5, 1.5], unit: 'mg/kg', type: 'paralysis', suitability: 'caution', warning: 'Usable, pero puede causar bradicardia, especialmente en segundas dosis.', presentation: 'Amp: 100 mg / 2 ml', concentration: 50, prep_unit: 'ml' }
                         ]
                     }
                 ]
@@ -425,28 +531,30 @@
                 objective: 'Objetivo: Asegurar vía aérea, prevenir aumento de PIC y mantener perfusión cerebral.',
                 steps: [
                     {
-                        title: 'Paso 1: Neuroprotección', time_explained: '(3 min ANTES de Inducción)',
+                        title: 'Paso 4.1: Neuroprotección', time_explained: '(3 min ANTES de Inducción)',
                         options: [
-                            { name: 'Lidocaína', dose: [1.5, 1.5], unit: 'mg/kg', type: 'pretreatment', presentation: 'Amp (2%): 100 mg / 5 ml', concentration: 20, prep_unit: 'ml' }
+                            { name: 'Lidocaína', dose: [1.5, 1.5], unit: 'mg/kg', type: 'pretreatment', suitability: 'optimal', warning: null, presentation: 'Amp (2%): 100 mg / 5 ml', concentration: 20, prep_unit: 'ml' }
                         ]
                     },
                     {
-                        title: 'Paso 2: Simpatolisis', time_explained: '(3 min ANTES de Inducción)',
+                        title: 'Paso 4.2: Simpatolisis', time_explained: '(3 min ANTES de Inducción)',
                         options: [
-                            { name: 'Fentanilo', dose: [1, 2], unit: 'mcg/kg', type: 'pretreatment', presentation: 'Amp: 100 mcg / 2 ml', concentration: 50, prep_unit: 'ml' }
+                            { name: 'Fentanilo', dose: [1, 2], unit: 'mcg/kg', type: 'pretreatment', suitability: 'optimal', warning: 'Atenúa la respuesta simpática (aumento de PA/PIC) a la laringoscopia.', presentation: 'Amp: 100 mcg / 2 ml', concentration: 50, prep_unit: 'ml' }
                         ]
                     },
                     {
-                        title: 'Paso 3: Inducción', time_explained: '(AHORA)',
+                        title: 'Paso 4.3: Inducción', time_explained: '(AHORA)',
                         options: [
-                            { name: 'Etomidato', dose: [0.3, 0.3], unit: 'mg/kg', type: 'induction', presentation: 'Amp: 20 mg / 10 ml', concentration: 2, prep_unit: 'ml' },
-                            { name: 'Propofol', dose: [1, 1.5], unit: 'mg/kg', type: 'induction', note: 'Solo si PA es estable o alta.', presentation: 'Amp: 200 mg / 20 ml', concentration: 10, prep_unit: 'ml' }
+                            { name: 'Etomidato', dose: [0.3, 0.3], unit: 'mg/kg', type: 'induction', suitability: 'optimal', warning: 'Opción ideal: reduce la PIC y es hemodinámicamente neutro.', presentation: 'Amp: 20 mg / 10 ml', concentration: 2, prep_unit: 'ml' },
+                            { name: 'Propofol', dose: [1, 1.5], unit: 'mg/kg', type: 'induction', suitability: 'caution', warning: 'Solo si la PA es estable o alta. Reduce la PIC pero puede causar hipotensión, bajando la Presión de Perfusión Cerebral.', presentation: 'Amp: 200 mg / 20 ml', concentration: 10, prep_unit: 'ml' },
+                            { name: 'Ketamina', dose: [1, 2], unit: 'mg/kg', type: 'induction', suitability: 'danger', warning: '¡ALERTA! La Ketamina aumenta la Presión Arterial y el Flujo Sanguíneo Cerebral, pudiendo aumentar la PIC. Evitar.', presentation: 'Amp: 500 mg / 10 ml', concentration: 50, prep_unit: 'ml' }
                         ]
                     },
                     {
-                        title: 'Paso 4: Parálisis', time_explained: '(5 seg DESPUÉS de Inducción)',
+                        title: 'Paso 4.4: Parálisis', time_explained: '(5 seg DESPUÉS de Inducción)',
                         options: [
-                            { name: 'Rocuronio', dose: [1.2, 1.2], unit: 'mg/kg', type: 'paralysis', note: 'Preferido para evitar fasciculaciones.', presentation: 'Amp: 50 mg / 5 ml', concentration: 10, prep_unit: 'ml' }
+                            { name: 'Rocuronio', dose: [1.2, 1.2], unit: 'mg/kg', type: 'paralysis', suitability: 'optimal', warning: 'Fármaco de elección. Evita las fasciculaciones de la Succinilcolina, que pueden aumentar la PIC.', presentation: 'Amp: 50 mg / 5 ml', concentration: 10, prep_unit: 'ml' },
+                            { name: 'Succinilcolina', dose: [1.5, 1.5], unit: 'mg/kg', type: 'paralysis', suitability: 'caution', warning: 'Subóptimo. Las fasciculaciones pueden aumentar transitoriamente la PIC.', presentation: 'Amp: 100 mg / 2 ml', concentration: 50, prep_unit: 'ml' }
                         ]
                     }
                 ]
@@ -456,27 +564,30 @@
                 objective: 'Objetivo: Intubar al paciente promoviendo activamente la broncodilatación.',
                 steps: [
                     {
-                        title: 'Paso 1: Reactividad Vía Aérea', time_explained: '(3 min ANTES de Inducción)',
+                        title: 'Paso 4.1: Reactividad Vía Aérea', time_explained: '(3 min ANTES de Inducción)',
                         options: [
-                            { name: 'Lidocaína', dose: [1.5, 1.5], unit: 'mg/kg', type: 'pretreatment', presentation: 'Amp (2%): 100 mg / 5 ml', concentration: 20, prep_unit: 'ml' }
+                            { name: 'Lidocaína', dose: [1.5, 1.5], unit: 'mg/kg', type: 'pretreatment', suitability: 'optimal', warning: 'Atenúa la reactividad de la vía aérea y el reflejo tusígeno.', presentation: 'Amp (2%): 100 mg / 5 ml', concentration: 20, prep_unit: 'ml' }
                         ]
                     },
                     {
-                        title: 'Paso 2: Simpatolisis', time_explained: '(3 min ANTES de Inducción)',
+                        title: 'Paso 4.2: Simpatolisis', time_explained: '(3 min ANTES de Inducción)',
                         options: [
-                            { name: 'Fentanilo', dose: [1, 1], unit: 'mcg/kg', type: 'pretreatment', presentation: 'Amp: 100 mcg / 2 ml', concentration: 50, prep_unit: 'ml' }
+                            { name: 'Fentanilo', dose: [1, 1], unit: 'mcg/kg', type: 'pretreatment', suitability: 'optimal', warning: null, presentation: 'Amp: 100 mcg / 2 ml', concentration: 50, prep_unit: 'ml' }
                         ]
                     },
                     {
-                        title: 'Paso 3: Inducción', time_explained: '(AHORA)',
+                        title: 'Paso 4.3: Inducción', time_explained: '(AHORA)',
                         options: [
-                            { name: 'Ketamina', dose: [1, 2], unit: 'mg/kg', type: 'induction', note: 'Propiedades broncodilatadoras.', presentation: 'Amp: 500 mg / 10 ml', concentration: 50, prep_unit: 'ml' }
+                            { name: 'Ketamina', dose: [1, 2], unit: 'mg/kg', type: 'induction', suitability: 'optimal', warning: 'Fármaco de elección por sus potentes propiedades broncodilatadoras.', presentation: 'Amp: 500 mg / 10 ml', concentration: 50, prep_unit: 'ml' },
+                            { name: 'Propofol', dose: [1.5, 2], unit: 'mg/kg', type: 'induction', suitability: 'caution', warning: 'Seguro (no libera histamina), pero no ofrece el beneficio broncodilatador de la Ketamina.', presentation: 'Amp: 200 mg / 20 ml', concentration: 10, prep_unit: 'ml' },
+                            { name: 'Etomidato', dose: [0.3, 0.3], unit: 'mg/kg', type: 'induction', suitability: 'caution', warning: 'Seguro, pero no ofrece el beneficio broncodilatador de la Ketamina.', presentation: 'Amp: 20 mg / 10 ml', concentration: 2, prep_unit: 'ml' }
                         ]
                     },
                     {
-                        title: 'Paso 4: Parálisis', time_explained: '(5 seg DESPUÉS de Inducción)',
+                        title: 'Paso 4.4: Parálisis', time_explained: '(5 seg DESPUÉS de Inducción)',
                         options: [
-                            { name: 'Rocuronio', dose: [1.2, 1.2], unit: 'mg/kg', type: 'paralysis', note: 'Evita liberación de histamina.', presentation: 'Amp: 50 mg / 5 ml', concentration: 10, prep_unit: 'ml' }
+                            { name: 'Rocuronio', dose: [1.2, 1.2], unit: 'mg/kg', type: 'paralysis', suitability: 'optimal', warning: 'Fármaco de elección. No libera histamina.', presentation: 'Amp: 50 mg / 5 ml', concentration: 10, prep_unit: 'ml' },
+                            { name: 'Succinilcolina', dose: [1.5, 1.5], unit: 'mg/kg', type: 'paralysis', suitability: 'caution', warning: 'Subóptimo. Aunque raro, se ha reportado liberación de histamina que podría empeorar el broncoespasmo.', presentation: 'Amp: 100 mg / 2 ml', concentration: 50, prep_unit: 'ml' }
                         ]
                     }
                 ]
@@ -485,12 +596,7 @@
 
         // --- STATE ---
         let currentWeight = 0;
-        let selectedOptions = {
-            standard: [0, 0, 0],
-            hemodynamic: [0, 0, 0],
-            tce: [0, 0, 0, 0],
-            bronchospasm: [0, 0, 0, 0]
-        };
+        let selectedOptions = {}; // Se inicializará con initializeState()
 
         // --- SELECTORS ---
         const weightInput = document.getElementById('patient-weight');
@@ -504,38 +610,26 @@
 
         /**
          * Construye el HTML inicial para todos los escenarios, pasos y opciones.
-         * Se llama una sola vez al cargar la página.
          */
         function renderScenarioUI() {
             for (const scenarioName in drugDatabase) {
                 const scenario = drugDatabase[scenarioName];
                 const stepsContainer = document.getElementById(`${scenarioName}-steps-container`);
                 
-                // **** FIX: Añadida comprobación de nulidad ****
                 const nameEl = document.getElementById(`${scenarioName}-name`);
                 const objectiveEl = document.getElementById(`${scenarioName}-objective`);
 
-                if (nameEl) {
-                    nameEl.textContent = scenario.name;
-                }
-                if (objectiveEl) {
-                    objectiveEl.textContent = scenario.objective;
-                }
-                // **** FIN FIX ****
-
+                if (nameEl) nameEl.textContent = scenario.name;
+                if (objectiveEl) objectiveEl.textContent = scenario.objective;
                 if (!stepsContainer) continue;
 
                 let stepsHtml = '';
                 scenario.steps.forEach((step, stepIndex) => {
                     // Botones de opciones
                     const optionButtonsHtml = step.options.map((option, optionIndex) => {
-                        // Comprobar si selectedOptions[scenarioName] existe
-                        if (!selectedOptions[scenarioName]) {
-                            // console.warn(`selectedOptions['${scenarioName}'] no está inicializado. Inicializando.`);
-                            initializeState(); // Re-inicializar si algo salió mal
-                        }
                         const isActive = optionIndex === selectedOptions[scenarioName][stepIndex];
-                        return `<button class="drug-option-btn ${isActive ? 'active' : ''}" 
+                        // FIX: Aplicando las clases de Pestaña (tab) para un look consistente
+                        return `<button class="tab-button ${isActive ? 'tab-active' : 'tab-inactive'} text-sm md:text-base py-2 px-4 rounded-lg border-2 transition-all duration-300" 
                                     data-scenario="${scenarioName}" 
                                     data-step-index="${stepIndex}" 
                                     data-option-index="${optionIndex}">
@@ -545,7 +639,7 @@
 
                     // Tarjeta de detalles (se llenará después)
                     stepsHtml += `
-                        <div class="bg-gray-800 rounded-2xl shadow-lg p-4 md:p-6 mb-6">
+                        <div class="drug-step-container">
                             <div class="step-header">
                                 <h3 class="step-title">${step.title}</h3>
                                 <span class="step-time-explained">${step.time_explained}</span>
@@ -556,6 +650,26 @@
                             </div>
                         </div>
                     `;
+
+                    // Añadir bloque de espera didáctico
+                    const stepTitleLower = step.title.toLowerCase();
+                    if (stepTitleLower.includes('pre-tratamiento') || stepTitleLower.includes('simpatolisis') || stepTitleLower.includes('reactividad') || stepTitleLower.includes('neuroprotección')) {
+                        stepsHtml += `
+                            <div class="wait-block wait-block-yellow">
+                                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <span>AHORA ESPERE 3 MINUTOS MIENTRAS ACTÚA EL PRE-TRATAMIENTO</span>
+                            </div>
+                        `;
+                    }
+                    
+                    if (stepTitleLower.includes('parálisis')) {
+                         stepsHtml += `
+                            <div class="wait-block wait-block-pink">
+                                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <span>AHORA ESPERE 45-60 SEGUNDOS PARA PARÁLISIS COMPLETA</span>
+                            </div>
+                        `;
+                    }
                 });
                 stepsContainer.innerHTML = stepsHtml;
             }
@@ -566,56 +680,54 @@
          */
         function updateAllCalculations() {
             for (const scenarioName in drugDatabase) {
-                // Asegurarse de que el escenario exista en el estado
                 if (selectedOptions[scenarioName]) {
                     drugDatabase[scenarioName].steps.forEach((step, stepIndex) => {
                         updateSingleDrugCard(scenarioName, stepIndex);
                     });
-                } else {
-                    // console.warn(`Saltando cálculos para escenario no inicializado: ${scenarioName}`);
-                }
+                } 
             }
         }
 
         /**
          * Actualiza una sola tarjeta de detalles de fármaco.
-         * Esta es la función principal de cálculo y renderizado.
          */
         function updateSingleDrugCard(scenarioName, stepIndex) {
-            // Asegurarse de que el índice de opción exista para este escenario/paso
             if (!selectedOptions[scenarioName] || selectedOptions[scenarioName][stepIndex] === undefined) {
-                // console.warn(`Estado no inicializado para ${scenarioName}, paso ${stepIndex}`);
-                if (selectedOptions[scenarioName]) {
-                     selectedOptions[scenarioName][stepIndex] = 0; // Inicializar si falta
-                } else {
-                    // console.error(`El escenario ${scenarioName} no existe en el estado.`);
-                    return; // No se puede continuar si el escenario no existe
-                }
+                 selectedOptions[scenarioName] = selectedOptions[scenarioName] || [];
+                 selectedOptions[scenarioName][stepIndex] = 0; 
             }
             
             const optionIndex = selectedOptions[scenarioName][stepIndex];
-            
-            if (!drugDatabase[scenarioName] || !drugDatabase[scenarioName].steps[stepIndex] || !drugDatabase[scenarioName].steps[stepIndex].options[optionIndex]) {
-                // console.error(`Datos no encontrados para ${scenarioName}, paso ${stepIndex}, opción ${optionIndex}`);
-                return; // Salir si los datos no existen
-            }
-
             const drug = drugDatabase[scenarioName].steps[stepIndex].options[optionIndex];
             const card = document.getElementById(`details-${scenarioName}-${stepIndex}`);
             
             if (!drug || !card) return;
 
-            card.className = `drug-details-card ${drug.type}`; // Actualiza el color del borde
+            card.className = `drug-details-card ${drug.type}`; 
+
+            // FIX: Generar Alerta de Fármaco Subóptimo (con estilo en línea y negrita)
+            let warningHtml = '';
+            if (drug.suitability === 'caution' && drug.warning) {
+                // Amarillo (#facc15)
+                warningHtml = `<p style="color: #facc15; font-weight: 700; margin-bottom: 8px;">
+                                 <strong>Precaución:</strong> ${drug.warning}
+                               </p>`;
+            } else if (drug.suitability === 'danger' && drug.warning) {
+                // Rojo (#ef4444)
+                warningHtml = `<p style="color: #ef4444; font-weight: 700; margin-bottom: 8px;">
+                                 <strong>¡ALERTA!</strong> ${drug.warning}
+                               </p>`;
+            }
 
             // Caso 1: Fármaco omitido
             if (drug.dose[0] === 0 && drug.dose[1] === 0) {
-                card.innerHTML = `<p class="text-lg font-bold text-gray-400">Omitido</p><p class="text-sm text-gray-500">${drug.note || ''}</p>`;
+                card.innerHTML = `${warningHtml} <p class="text-lg font-bold text-gray-400">Omitido</p><p class="text-sm text-gray-500">${drug.note || ''}</p>`;
                 return;
             }
 
             // Caso 2: Sin peso ingresado
             if (currentWeight <= 0) {
-                card.innerHTML = `<p class="text-lg font-bold dose-placeholder">Ingrese peso para calcular</p>`;
+                card.innerHTML = `${warningHtml} <p class="text-lg font-bold dose-placeholder">Ingrese peso para calcular</p>`;
                 return;
             }
 
@@ -631,22 +743,25 @@
                 const prepMax_ml = (doseMax_mg / drug.concentration).toFixed(1);
                 const prepRange_ml = prepMin_ml === prepMax_ml ? `${prepMin_ml} ${drug.prep_unit}` : `${prepMin_ml} - ${prepMax_ml} ${drug.prep_unit}`;
 
+                // FIX: Aplicado estilo en línea para forzar color verde y negrita
                 prepHtml = `
                     <div class="detail-item">
                         <h4>Preparación (Cargar)</h4>
-                        <p class="dose-ml">${prepRange_ml}</p>
+                        <p class_dosis_ml style="color: #4ade80 !important; font-weight: 700 !important; font-size: 1.125rem; line-height: 1.75rem;">${prepRange_ml}</p>
                     </div>
                 `;
             }
 
             const formula = `(${drug.dose[0]}${drug.dose[1] !== drug.dose[0] ? '-' + drug.dose[1] : ''} ${drug.unit} * ${currentWeight} kg)`;
-            const noteHtml = drug.note ? `<p class="text-sm text-gray-500 col-span-1 md:col-span-3 mt-2">${drug.note}</p>` : '';
+            const noteHtml = drug.note ? `<p class="text-sm text-gray-500 col-span-1 md:col-span-3 mt-2">${noteHtml}</p>` : '';
 
+            // FIX: Aplicado estilo en línea para forzar color verde y negrita
             card.innerHTML = `
+                ${warningHtml}
                 <div class="detail-grid">
                     <div class="detail-item">
                         <h4>Dosis (Peso)</h4>
-                        <p class="dose-mg">${doseRange_mg}</p>
+                        <p class_dosis_mg style="color: #4ade80 !important; font-weight: 700 !important; font-size: 1.125rem; line-height: 1.75rem;">${doseRange_mg}</p>
                     </div>
                     ${prepHtml}
                     <div class="detail-item">
@@ -688,33 +803,34 @@
         }
 
         function handleOptionClick(event) {
-            const button = event.target.closest('.drug-option-btn');
-            if (!button) return;
+            // Usamos .closest() para asegurarnos de capturar el botón correcto
+            const button = event.target.closest('.tab-button');
+            if (!button || !button.dataset.scenario || !button.dataset.stepIndex) return; // Salir si no es un botón de fármaco
 
             const { scenario, stepIndex, optionIndex } = button.dataset;
             
-            // Actualizar estado
             if (selectedOptions[scenario]) {
                 selectedOptions[scenario][stepIndex] = parseInt(optionIndex, 10);
             } else {
-                // console.error(`Escenario no encontrado en el estado: ${scenario}`);
                 return;
             }
 
-            // Actualizar UI de botones (quitar 'active' de hermanos, poner 'active' en el clickeado)
             const buttonGroup = button.parentElement;
-            buttonGroup.querySelectorAll('.drug-option-btn').forEach(btn => {
-                btn.classList.remove('active');
+            // Actualizar clases de botones en el grupo
+            buttonGroup.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('tab-active');
+                btn.classList.add('tab-inactive');
             });
-            button.classList.add('active');
+            button.classList.add('tab-active');
+            button.classList.remove('tab-inactive');
             
-            // Actualizar solo la tarjeta de detalles afectada
             updateSingleDrugCard(scenario, parseInt(stepIndex, 10));
         }
 
         function switchTab(event) {
             const targetButton = event.target.closest('.tab-button');
-            if (!targetButton) return;
+            // Salir si es un botón de fármaco (manejado por handleOptionClick)
+            if (!targetButton || targetButton.dataset.stepIndex) return; 
 
             tabsContainer.querySelectorAll('.tab-button').forEach(button => {
                 button.classList.remove('tab-active');
@@ -730,17 +846,23 @@
 
         // --- INITIALIZATION ---
         
-        // Inicializar el estado de selectedOptions basado en la base de datos para evitar errores
+        /**
+         * Inicializa el estado seleccionando el fármaco "optimal" por defecto.
+         */
         function initializeState() {
             for (const scenarioName in drugDatabase) {
-                selectedOptions[scenarioName] = drugDatabase[scenarioName].steps.map(() => 0); // Default to the first option (index 0)
+                selectedOptions[scenarioName] = drugDatabase[scenarioName].steps.map(step => {
+                    const optimalIndex = step.options.findIndex(opt => opt.suitability === 'optimal');
+                    return optimalIndex !== -1 ? optimalIndex : 0; // Default to optimal, or 0 if none found
+                });
             }
         }
 
+        // --- Event Listeners ---
         calculateBtn.addEventListener('click', handleCalculate);
         clearBtn.addEventListener('click', handleClear);
-        tabsContainer.addEventListener('click', switchTab);
-        scenariosContainer.addEventListener('click', handleOptionClick);
+        tabsContainer.addEventListener('click', switchTab); // Maneja pestañas de escenario
+        scenariosContainer.addEventListener('click', handleOptionClick); // Maneja botones de fármacos
         
         weightInput.addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
@@ -749,7 +871,7 @@
             }
         });
 
-        // Construir la UI inicial y luego popular los cálculos (que mostrarán "Ingrese peso")
+        // --- RUN ---
         initializeState();
         renderScenarioUI();
         updateAllCalculations();
