@@ -6,8 +6,8 @@
     <title>Asistente ISR - Hospital Ilia</title>
     
     <meta name="theme-color" content="#4f46e5"/>
-    <link rel="apple-touch-icon" href="icon-192.png"> 
-    <link rel="icon" type="image/png" sizes="32x32" href="icon-192.png">
+    <link rel="apple-touch-icon" href="https://placehold.co/180x180/4f46e5/ffffff?text=ISR">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://placehold.co/32x32/4f46e5/ffffff?text=I">
     <link rel="manifest" href="manifest.json">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -19,8 +19,32 @@
             font-family: 'Inter', sans-serif;
         }
         
-        /* ... [Estilos de Fases 1 y 2 sin cambios] ... */
-
+        /* Estilo Pestañas de Escenario Y Botones de Fármaco */
+        .tab-active {
+            border-color: #4f46e5;
+            color: #e0e7ff;
+            background-color: #4f46e5;
+            font-weight: 600;
+        }
+        .tab-inactive {
+            border-color: #4b5563; /* border-gray-600 */
+            color: #d1d5db; /* text-gray-300 */
+            font-weight: 600;
+        }
+        .tab-inactive:hover {
+            background-color: #374151; /* bg-gray-700 */
+            border-color: #6b7280; /* border-gray-500 */
+        }
+        
+        .scenario-card {
+            display: none;
+        }
+        .scenario-card.active {
+            display: block;
+        }
+        
+        /* --- FASE 2 (REVISIÓN 2): Estilos Checklist --- */
+        
         /* Estilo para SOAPME (SÍ se tacha) */
         .checklist-item input:checked + label {
             text-decoration: line-through;
@@ -40,7 +64,10 @@
             color: #e5e7eb; /* Mantiene el color de texto normal */
             font-weight: 600; /* Opcional: hacerlo negrita */
         }
-        
+        /* --- Fin Estilos Checklist --- */
+
+
+        /* --- FASE 2 (REVISIÓN 2): Estilos para Scorecard LEMON (con colores G-Y-R) --- */
         .lemon-score-card {
             @apply bg-gray-900 rounded-lg p-5 sticky top-6;
         }
@@ -71,6 +98,8 @@
             @apply border-red-500 bg-red-900 bg-opacity-30 text-red-300;
         }
         .lemon-result-danger h5 { @apply text-red-400; }
+        /* --- Fin Estilos LEMON --- */
+
 
         .step-header {
             @apply flex justify-between items-baseline mb-3 border-b border-gray-700 pb-2;
@@ -86,6 +115,7 @@
             @apply flex flex-wrap gap-2 mb-3;
         }
         
+        /* Contenedor de Fármacos */
         .drug-step-container {
              @apply bg-gray-800 rounded-2xl shadow-lg p-4 md:p-6 mb-6;
         }
@@ -100,7 +130,7 @@
         .omit { border-left-color: #6b7280; }
 
         .detail-grid {
-            @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+            @apply grid grid-cols-1 md:grid-cols-2 gap-4; /* Modificado a 2 columnas para dar espacio */
         }
         .detail-item h4 {
             @apply text-sm font-semibold text-gray-400 uppercase tracking-wider;
@@ -110,6 +140,7 @@
             @apply text-lg font-bold text-yellow-500;
         }
 
+        /* Línea de tiempo visual */
         .timeline {
             @apply flex items-center justify-between w-full bg-gray-800 p-4 rounded-lg mb-6;
         }
@@ -131,6 +162,7 @@
         .timeline-label { @apply text-sm font-semibold mt-2; }
         .timeline-time { @apply text-xs text-gray-400; }
 
+        /* Estilo para los bloques de espera didácticos */
         .wait-block {
             @apply flex items-center justify-center text-center gap-3 my-4 p-4 bg-gray-900 rounded-lg border-2 border-dashed;
         }
@@ -154,6 +186,7 @@
             @apply text-pink-400 animate-pulse;
         }
 
+        /* Estilos para la mnemotecnia DOPE */
         .dope-item {
             @apply flex items-start gap-3 p-3 bg-gray-800 rounded-lg;
         }
@@ -167,6 +200,7 @@
             @apply text-sm text-gray-400;
         }
         
+        /* Disclaimer */
         .disclaimer-box {
             @apply mt-10 pt-4 border-t border-gray-700 text-center;
         }
@@ -177,35 +211,13 @@
             @apply text-xs text-gray-500 italic;
         }
 
-        /* FASE 3: Estilos Panel de Estado */
-        #status-panel {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            @apply p-2 text-center font-semibold transition-all;
-        }
-        .status-connecting { @apply bg-gray-700 text-gray-300; }
-        .status-ready { @apply bg-green-800 text-green-200; }
-        .status-offline { @apply bg-yellow-800 text-yellow-200; }
-
-        /* FASE 3: Estilos Botón Descarga */
-        #download-video-btn {
-            @apply mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-5 rounded-lg transition-colors;
-        }
-        #download-video-btn:disabled {
-            @apply bg-gray-500 cursor-not-allowed;
-        }
-        
     </style>
 </head>
 <body class="bg-gray-900 text-gray-200 antialiased">
 
-    <div id="status-panel" class="status-connecting">
-        <span>Conectando...</span>
-    </div>
-
     <div class="container mx-auto p-4 md:p-8 max-w-5xl">
-        <header class="text-center mb-8 pt-4"> <div class="flex items-center justify-center gap-4">
+        <header class="text-center mb-8">
+             <div class="flex items-center justify-center gap-4">
                 <svg class="w-10 h-10 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
                 </svg>
@@ -267,6 +279,7 @@
                         <label for="l5" class="ml-3 text-lg font-semibold text-gray-100">N<span class="text-indigo-400">eck</span> (Movilidad del Cuello)</label>
                         <p class="ml-8 text-sm text-gray-400">Movilidad cervical limitada, collarín cervical, paciente en tabla espinal, artritis reumatoide severa.</p>
                     </div>
+
                 </div>
                 
                 <div class="md:col-span-1">
@@ -277,12 +290,14 @@
                                 <span id="lemon-score">0</span>
                             </div>
                         </div>
+                        
                         <div id="lemon-result-box" class="lemon-result-box lemon-result-safe">
                             <h5 class="font-bold text-lg">Vía Aérea No Dificultosa</h5>
-                            <p class="text-sm">Score 0. Proceda con el plan estándar.</p>
+                            <p class="text-sm">Proceda con el plan estándar.</p>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
 
@@ -320,18 +335,234 @@
                     <div class="checklist-item"><input id="c15" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c15" class="ml-2">Monitor cardíaco / EKG</label></div>
                     <div class="checklist-item"><input id="c16" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c16" class="ml-2">Presión arterial no invasiva</label></div>
                     <div class="checklist-item"><input id="c17" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c17" class="ml-2">Pulsioximetría</label></div>
-                    <div class="checklist-item"><input id="c18" type="checkbox" class
-...
+                    <div class="checklist-item"><input id="c18" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c18" class="ml-2">Capnografía (EtCO₂)</label></div>
+                </div>
+                <div class="space-y-2">
+                    <h3 class="font-bold text-lg text-gray-300">E<span class="text-indigo-400">quipment</span> (Vía Aérea Fallida)</h3>
+                    <div class="checklist-item"><input id="c19" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c19" class="ml-2">Plan B: Dispositivo supraglótico</label></div>
+                    <div class="checklist-item"><input id="c20" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c20" class="ml-2">Plan D: Equipo de cricotiroidotomía</label></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4"><span class="text-gray-500 font-normal">Paso 3:</span> Selección de Dispositivos</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-300 mb-3">Tubo Endotraqueal (IOT)</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <h4 class="font-semibold text-gray-200">Adultos:</h4>
+                            <ul class="list-disc list-inside text-gray-400">
+                                <li><b>Mujeres:</b> Tubo 7.0 - 7.5 mm</li>
+                                <li><b>Hombres:</b> Tubo 8.0 - 8.5 mm</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold text-gray-200">Neonatos y Lactantes (&lt; 1 año):</h4>
+                            <ul class="list-disc list-inside text-gray-400">
+                                <li><b>Neonato (Prematuro):</b> 2.5 - 3.0 mm</li>
+                                <li><b>Neonato (Término):</b> 3.0 - 3.5 mm</li>
+                                <li><b>Lactante (6 meses):</b> 3.5 - 4.0 mm</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold text-gray-200">Pediátrico (>1 año):</h4>
+                            <p class="text-gray-400 text-sm">Sin manguito: <code class="bg-gray-700 p-1 rounded">(Edad / 4) + 4</code></p>
+                            <p class="text-gray-400 text-sm mt-1">Con manguito: <code class="bg-gray-700 p-1 rounded">(Edad / 4) + 3.5</code></p>
+
+                            <div class="mt-4 pt-4 border-t border-gray-700">
+                                <label for="pediatric-age-input" class="block text-sm font-medium text-gray-300 mb-2">Calcular (Edad en años):</label>
+                                <input type="number" id="pediatric-age-input" placeholder="Ej: 5" min="0" class="w-full bg-gray-700 text-white rounded-lg border-2 border-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 p-2 text-sm">
+                                
+                                <div class="mt-3 grid grid-cols-2 gap-2">
+                                    <div>
+                                        <p class="text-xs text-gray-400">Sin manguito (mm):</p>
+                                        <p id="tube-uncuffed-result" class="text-lg font-bold text-indigo-300">-</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-400">Con manguito (mm):</p>
+                                        <p id="tube-cuffed-result" class="text-lg font-bold text-indigo-300">-</p>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-300 mb-3">Cánula de Guedel (Mayo)</h3>
+                     <ul class="space-y-1 text-gray-400 text-sm">
+                        <li class="flex items-center"><span class="w-12 text-center mr-2 p-1 bg-red-200 text-red-800 rounded font-mono">000</span> Rosa: Neonatos</li>
+                        <li class="flex items-center"><span class="w-12 text-center mr-2 p-1 bg-blue-200 text-blue-800 rounded font-mono">00</span> Azul: Lactantes</li>
+                        <li class="flex items-center"><span class="w-12 text-center mr-2 p-1 bg-gray-300 text-black rounded font-mono">0</span> Negro: Niños pequeños</li>
+                        <li class="flex items-center"><span class="w-12 text-center mr-2 p-1 bg-white text-black rounded font-mono">1</span> Blanco: Niños mayores</li>
+                        <li class="flex items-center"><span class="w-12 text-center mr-2 p-1 bg-green-200 text-green-800 rounded font-mono">2</span> Verde: Adultos pequeños</li>
+                        <li class="flex items-center"><span class="w-12 text-center mr-2 p-1 bg-yellow-200 text-yellow-800 rounded font-mono">3</span> Amarillo: Adultos medianos</li>
+                        <li class="flex items-center"><span class="w-12 text-center mr-2 p-1 bg-red-400 text-white rounded font-mono">4</span> Rojo: Adultos grandes</li>
+                        <li class="flex items-center"><span class="w-12 text-center mr-2 p-1 bg-orange-300 text-orange-800 rounded font-mono">5</span> Naranja: Adultos muy grandes</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-300 mb-3">Hojas de Laringoscopio</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <h4 class="font-semibold text-gray-200">Macintosh (Curva):</h4>
+                            <p class="text-xs text-gray-500">Adultos. Punta en valécula.</p>
+                            <ul class="list-disc list-inside text-gray-400">
+                                <li><b>Nº 3:</b> Adulto estándar</li>
+                                <li><b>Nº 4:</b> Adulto grande / Obeso</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-200">Miller (Recta):</h4>
+                            <p class="text-xs text-gray-500">Pediátrico. Levanta epiglotis.</p>
+                             <ul class="list-disc list-inside text-gray-400">
+                                <li><b>Nº 0:</b> Neonato</li>
+                                <li><b>Nº 1:</b> Lactante</li>
+                                <li><b>Nº 2:</b> Niño</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        
+        <div class="mb-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4"><span class="text-gray-500 font-normal">Paso 4:</span> Pre-oxigenación</h2>
+            <div class="flex items-start gap-4 p-4 bg-gray-700 rounded-lg">
+                <svg class="w-10 h-10 text-indigo-300 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-100">Administrar O₂ al 100% (FiO₂) durante 3-5 minutos.</h3>
+                    <p class="text-gray-400">Objetivo: Desnitrogenar los pulmones para crear un reservorio de oxígeno. Esto le da <strong class="text-white">varios minutos de apnea segura</strong> antes de la desaturación.</p>
+                    <p class="text-sm text-yellow-300 mt-2">No quite la mascarilla de O₂ hasta el momento exacto de la laringoscopia.</p>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4 text-center"><span class="text-gray-500 font-normal">Paso 5:</span> Cálculo de Dosis (Farmacología)</h2>
+            
+            <div class="timeline">
+                <div class="timeline-step timeline-step-1">
+                    <div class="timeline-dot"></div>
+                    <span class="timeline-label">Pre-tratamiento</span>
+                    <span class="timeline-time">T-3 min</span>
+                </div>
+                <div class="timeline-bar"></div>
+                <div class="timeline-step timeline-step-2">
+                    <div class="timeline-dot"></div>
+                    <span class="timeline-label">Inducción</span>
+                    <span class="timeline-time">T-0</span>
+                </div>
+                <div class="timeline-bar"></div>
+                <div class="timeline-step timeline-step-3">
+                    <div class="timeline-dot"></div>
+                    <span class="timeline-label">Parálisis</span>
+                    <span class="timeline-time">T+5 seg</span>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <nav class="flex flex-wrap justify-center gap-2 md:gap-4" id="scenario-tabs">
+                    <button data-scenario="standard" class="tab-button tab-active text-sm md:text-base py-2 px-4 rounded-lg border-2 transition-all duration-300">Paciente Estándar</button>
+                    <button data-scenario="hemodynamic" class="tab-button tab-inactive text-sm md:text-base py-2 px-4 rounded-lg border-2 transition-all duration-300">Inestabilidad Hemodinámica</button>
+                    <button data-scenario="tce" class="tab-button tab-inactive text-sm md:text-base py-2 px-4 rounded-lg border-2 transition-all duration-300">TCE / HIC</button>
+                    <button data-scenario="bronchospasm" class="tab-button tab-inactive text-sm md:text-base py-2 px-4 rounded-lg border-2 transition-all duration-300">Broncoespasmo Severo</button>
+                </nav>
+            </div>
+
+            <div id="scenarios-container">
+                <div id="standard" class="scenario-card active">
+                    <h3 class="text-2xl font-bold text-gray-200 mb-2" id="standard-name"></h3>
+                    <p class="text-gray-400 mb-6" id="standard-objective"></p>
+                    <div class="space-y-0" id="standard-steps-container"></div>
+                </div>
+                <div id="hemodynamic" class="scenario-card">
+                    <h3 class="text-2xl font-bold text-gray-200 mb-2" id="hemodynamic-name"></h3>
+                    <p class="text-gray-400 mb-6" id="hemodynamic-objective"></p>
+                    <div class="space-y-0" id="hemodynamic-steps-container"></div>
+                </div>
+                <div id="tce" class="scenario-card">
+                    <h3 class="text-2xl font-bold text-gray-200 mb-2" id="tce-name"></h3>
+                    <p class="text-gray-400 mb-6" id="tce-objective"></p>
+                    <div class="space-y-0" id="tce-steps-container"></div>
+                </div>
+                <div id="bronchospasm" class="scenario-card">
+                     <h3 class="text-2xl font-bold text-gray-200 mb-2" id="bronchospasm-name"></h3>
+                    <p class="text-gray-400 mb-6" id="bronchospasm-objective"></p>
+                    <div class="space-y-0" id="bronchospasm-steps-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4"><span class="text-gray-500 font-normal">Paso 6:</span> Posicionamiento y Procedimiento</h2>
+            <ol class="list-decimal list-inside space-y-4 text-gray-300">
+                <li>
+                    <strong class="font-semibold text-gray-100">Posicionamiento y Protección:</strong>
+                    <p class="text-sm text-gray-400 ml-5">Mientras los fármacos actúan (~45-60s), optimice la posición. Use la "posición de olfateo" (cabeza elevada) o "rampa" en pacientes obesos. Considere la maniobra BURP para mejorar la visualización laríngea.</p>
+                </li>
+                <li>
+                    <strong class="font-semibold text-gray-100">Paso del Tubo (Laringoscopia):</strong>
+                    <p class="text-sm text-gray-400 ml-5">Con relajación muscular completa, realice la laringoscopia. Visualice las cuerdas vocales e inserte el tubo endotraqueal. Retire la guía e infle el neumotaponador.</p>
+                </li>
+                <li>
+                    <strong class="font-semibold text-gray-100">Manejo Post-Intubación (Confirmación):</strong>
+                    <p class="text-sm text-gray-400 ml-5">El paso más crítico. Confirme la posición con <strong class="text-yellow-300">Capnografía de Onda (EtCO₂)</strong> (Gold Standard). Ausculte y asegure el tubo. Inicie sedación continua.</p>
+                    
+                    <div class="bg-gray-700 p-4 rounded-lg mt-4 ml-5">
+                        <h4 class="font-semibold text-yellow-300 mb-3">Si hay deterioro súbito, evalúe (DOPE):</h4>
+                        <div class="space-y-3">
+                            <div class="dope-item">
+                                <div class="dope-letter">D</div>
+                                <div class="dope-content">
+                                    <h5>Displacement (Desplazamiento)</h5>
+                                    <p>¿Se movió el tubo? (ej. extubación, intubación bronquial derecha). Re-evaluar profundidad y auscultar.</p>
+                                </div>
+                            </div>
+                            <div class="dope-item">
+                                <div class="dope-letter">O</div>
+                                <div class="dope-content">
+                                    <h5>Obstruction (Obstrucción)</h5>
+                                    <p>¿Está el tubo tapado? (secreciones, sangre, acodamiento). Intentar aspirar con sonda.</p>
+                                </div>
+                            </div>
+                            <div class="dope-item">
+                                <div class="dope-letter">P</div>
+                                <div class="dope-content">
+                                    <h5>Pneumothorax (Neumotórax)</h5>
+                                    <p>¿Pulmón colapsado? (especialmente a tensión). Auscultar, percutir, confirmar con ecografía o Rx.</p>
+                                </div>
+                            </div>
+                            <div class="dope-item">
+                                <div class="dope-letter">E</div>
+                                <div class="dope-content">
+                                    <h5>Equipment (Equipo)</h5>
+                                    <p>¿Falló el ventilador? ¿Está desconectado? ¿Se acabó el oxígeno? Revisar circuito desde el paciente hasta la máquina.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ol>
+        </div>
+
+        <div class="mt-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4"><span class="text-gray-500 font-normal">Guía Visual:</span> Video de Intubación</h2>
+            <p class="text-gray-400 mb-4 text-sm">Este video es un recurso de apoyo adicional. Asegúrese de que esté completamente cargado y probado sin conexión.</p>
+            <div class="aspect-w-16 aspect-h-9 bg-gray-900 rounded-lg overflow-hidden shadow-lg">
+                <video controls class="w-full h-full" preload="metadata">
                     <source src="guia_intubacion.mp4" type="video/mp4">
                     Tu navegador no soporta el tag de video.
                 </video>
             </div>
-            
-            <button id="download-video-btn" class="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-5 rounded-lg transition-colors">
-                Descargar Guía (8Mb) para Modo Offline
-            </button>
-            <p id="download-progress" class="text-sm text-gray-400 mt-2 text-center"></p>
-            
             <p class="text-xs text-gray-500 mt-2 text-center">Video de referencia (8Mb). La primera carga (para caché) puede demorar.</p>
         </div>
 
@@ -370,7 +601,8 @@
 
     </div> <script>
         // **** BASE DE DATOS de FÁRMACOS ****
-        // ... [Base de datos sin cambios] ...
+        // FASE 1 - CORRECCIÓN 1: 'concentration' y 'presentation' reemplazados por 'presentation_text', 'default_mass', y 'default_vol'
+        // FASE 2: Títulos de pasos re-numerados (4.x -> 5.x)
         const drugDatabase = {
             standard: {
                 name: 'Paciente Estándar (Normotenso)',
@@ -497,7 +729,7 @@
 
         // --- STATE ---
         let currentWeight = 0;
-        let selectedOptions = {};
+        let selectedOptions = {}; // Se inicializará con initializeState()
 
         // --- SELECTORS ---
         const weightInput = document.getElementById('patient-weight');
@@ -510,21 +742,11 @@
         const uncuffedResultEl = document.getElementById('tube-uncuffed-result');
         const cuffedResultEl = document.getElementById('tube-cuffed-result');
         
-        // LEMON
+        // FASE 2 (REVISIÓN): Selectores LEMON
         const lemonScoreEl = document.getElementById('lemon-score');
         const lemonScoreDisplayEl = document.getElementById('lemon-score-display');
         const lemonResultBoxEl = document.getElementById('lemon-result-box');
         const lemonCheckboxes = document.querySelectorAll('.lemon-check');
-
-        // FASE 3: Selectores PWA/Offline
-        const statusPanel = document.getElementById('status-panel');
-        const downloadBtn = document.getElementById('download-video-btn');
-        const downloadProgress = document.getElementById('download-progress');
-
-        // FASE 3: Constantes de Caché (deben coincidir con sw.js)
-        const VIDEO_CACHE_NAME = 'isr-asistente-cache-video-v1';
-        const VIDEO_ASSET_URL = 'guia_intubacion.mp4';
-
 
         // --- FUNCTIONS ---
 
@@ -591,8 +813,10 @@
 
                 let stepsHtml = '';
                 scenario.steps.forEach((step, stepIndex) => {
+                    // Botones de opciones
                     const optionButtonsHtml = step.options.map((option, optionIndex) => {
                         const isActive = optionIndex === selectedOptions[scenarioName][stepIndex];
+                        // FIX: Aplicando las clases de Pestaña (tab) para un look consistente
                         return `<button class="tab-button ${isActive ? 'tab-active' : 'tab-inactive'} text-sm md:text-base py-2 px-4 rounded-lg border-2 transition-all duration-300" 
                                     data-scenario="${scenarioName}" 
                                     data-step-index="${stepIndex}" 
@@ -601,6 +825,7 @@
                             </button>`;
                     }).join('');
 
+                    // Tarjeta de detalles (se llenará después)
                     stepsHtml += `
                         <div class="drug-step-container">
                             <div class="step-header">
@@ -613,7 +838,9 @@
                         </div>
                     `;
 
+                    // Añadir bloque de espera didáctico
                     const stepTitleLower = step.title.toLowerCase();
+                    // FASE 2: RENUMERADO - Ajustado para buscar por contenido, no por número de paso
                     if (stepTitleLower.includes('pre-tratamiento') || stepTitleLower.includes('simpatolisis') || stepTitleLower.includes('reactividad') || stepTitleLower.includes('neuroprotección')) {
                         stepsHtml += `
                             <div class="wait-block wait-block-yellow">
@@ -643,6 +870,7 @@
             for (const scenarioName in drugDatabase) {
                 if (selectedOptions[scenarioName]) {
                     drugDatabase[scenarioName].steps.forEach((step, stepIndex) => {
+                        // FASE 1 - CORRECCIÓN 1: 'forceDefaults' es 'false' al actualizar el peso
                         updateSingleDrugCard(scenarioName, stepIndex, false);
                     });
                 } 
@@ -651,6 +879,7 @@
 
         /**
          * Actualiza una sola tarjeta de detalles de fármaco.
+         * FASE 1 - CORRECCIÓN 1: Modificada para manejar 'forceDefaults' y leer/escribir inputs de presentación.
          */
         function updateSingleDrugCard(scenarioName, stepIndex, forceDefaults = false) {
             if (!selectedOptions[scenarioName] || selectedOptions[scenarioName][stepIndex] === undefined) {
@@ -666,21 +895,27 @@
 
             card.className = `drug-details-card ${drug.type}`; 
 
+            // Determinar los valores de presentación a usar
             let mass_to_use = drug.default_mass;
             let vol_to_use = drug.default_vol;
 
             if (!forceDefaults) {
+                // Si no forzamos defaults, intentamos leer los valores actuales de los inputs
                 const massInput = document.getElementById(`drug-mass-${scenarioName}-${stepIndex}`);
                 const volInput = document.getElementById(`drug-vol-${scenarioName}-${stepIndex}`);
+                
+                // Si los inputs existen, usamos su valor (incluso si el peso cambia)
                 if (massInput) mass_to_use = parseFloat(massInput.value) || drug.default_mass;
                 if (volInput) vol_to_use = parseFloat(volInput.value) || drug.default_vol;
             }
             
+            // Calcular concentración en vivo
             let live_concentration = 0;
             if (vol_to_use > 0 && mass_to_use > 0) {
                 live_concentration = mass_to_use / vol_to_use;
             }
 
+            // FIX: Generar Alerta de Fármaco Subóptimo (con estilo en línea y negrita)
             let warningHtml = '';
             if (drug.suitability === 'caution' && drug.warning) {
                 warningHtml = `<p style="color: #facc15; font-weight: 700; margin-bottom: 8px;">
@@ -692,16 +927,19 @@
                                </p>`;
             }
 
+            // Caso 1: Fármaco omitido
             if (drug.dose[0] === 0 && drug.dose[1] === 0) {
                 card.innerHTML = `${warningHtml} <p class="text-lg font-bold text-gray-400">Omitido</p><p class="text-sm text-gray-500">${drug.note || ''}</p>`;
                 return;
             }
 
+            // Caso 2: Sin peso ingresado
             if (currentWeight <= 0) {
                 card.innerHTML = `${warningHtml} <p class="text-lg font-bold dose-placeholder">Ingrese peso para calcular</p>`;
                 return;
             }
 
+            // Caso 3: Calcular dosis
             const doseMin_mg = (drug.dose[0] * currentWeight).toFixed(1);
             const doseMax_mg = (drug.dose[1] * currentWeight).toFixed(1);
             const dose_unit = drug.unit.replace('/kg', '');
@@ -731,10 +969,10 @@
             const formula = `(${drug.dose[0]}${drug.dose[1] !== drug.dose[0] ? '-' + drug.dose[1] : ''} ${drug.unit} * ${currentWeight} kg)`;
             const noteHtml = drug.note ? `<p class="text-sm text-gray-500 col-span-1 md:col-span-3 mt-2">${noteHtml}</p>` : '';
             
+            // FASE 1 - CORRECCIÓN 1: HTML para presentación editable
             const presentationMassUnit = drug.unit.startsWith('mcg') ? 'mcg' : 'mg';
             const presentationHTML = `
-                <div class="detail-item col-span-1 md:col-span-2">
-                    <h4>Presentación (Editable)</h4>
+                <div class="detail-item col-span-1 md:col-span-2"> <h4>Presentación (Editable)</h4>
                     <p class="text-sm text-gray-300 mb-2">${drug.presentation_text || 'N/A'}</p>
                     <div class="flex items-center gap-2 flex-wrap">
                         <label for="drug-mass-${scenarioName}-${stepIndex}" class="text-sm sr-only">Masa Vial:</label>
@@ -756,6 +994,7 @@
                 </div>
             `;
 
+            // RENDERIZADO FINAL DE LA TARJETA
             card.innerHTML = `
                 ${warningHtml}
                 <div class="detail-grid">
@@ -775,14 +1014,17 @@
 
         /**
          * FASE 2: Maneja el click en CUALQUIER checkbox para guardar su estado en localStorage.
+         * FASE 2 (REVISIÓN): Modificado para llamar a updateLemonScore()
          */
         function handleChecklistClick(event) {
+            // Solo nos interesan los checkboxes que tengan un ID
             if (event.target.type !== 'checkbox' || !event.target.id) return; 
 
             const checkbox = event.target;
             const id = checkbox.id;
             
             try {
+                // Usamos un Set para manejar fácilmente los IDs únicos
                 const savedItems = JSON.parse(localStorage.getItem('savedChecklistItems') || '[]');
                 const itemSet = new Set(savedItems);
 
@@ -792,16 +1034,19 @@
                     itemSet.delete(id);
                 }
                 
+                // Convertir el Set de nuevo a un Array y guardar
                 localStorage.setItem('savedChecklistItems', JSON.stringify(Array.from(itemSet)));
             } catch (e) {
                 console.error("Error al guardar estado del checklist:", e);
             }
             
+            // FASE 2 (REVISIÓN): Actualizar score si es un check de LEMON
             if (checkbox.classList.contains('lemon-check')) {
                 updateLemonScore();
             }
         }
         
+        // FASE 1 - CORRECCIÓN 2: 'handleCalculate' se mantiene, pero será llamado por 'input'
         function handleCalculate() {
             const weight = parseFloat(weightInput.value);
             if (weight > 0) {
@@ -828,6 +1073,7 @@
             weightInput.focus();
         }
 
+        // Nuevo Handler para Calculadora Pediátrica
         function handlePediatricAgeChange() {
             const age = parseFloat(pediatricAgeInput.value);
             if (age > 0) {
@@ -842,9 +1088,11 @@
             }
         }
 
+        // FASE 1 - CORRECCIÓN 1: Modificado para enviar 'forceDefaults = true'
         function handleOptionClick(event) {
+            // Usamos .closest() para asegurarnos de capturar el botón correcto
             const button = event.target.closest('.tab-button');
-            if (!button || !button.dataset.scenario || !button.dataset.stepIndex) return; 
+            if (!button || !button.dataset.scenario || !button.dataset.stepIndex) return; // Salir si no es un botón de fármaco
 
             const { scenario, stepIndex, optionIndex } = button.dataset;
             
@@ -855,6 +1103,7 @@
             }
 
             const buttonGroup = button.parentElement;
+            // Actualizar clases de botones en el grupo
             buttonGroup.querySelectorAll('.tab-button').forEach(btn => {
                 btn.classList.remove('tab-active');
                 btn.classList.add('tab-inactive');
@@ -862,19 +1111,23 @@
             button.classList.add('tab-active');
             button.classList.remove('tab-inactive');
             
+            // Llamar con forceDefaults = true
             updateSingleDrugCard(scenario, parseInt(stepIndex, 10), true);
         }
 
+        // FASE 1 - CORRECCIÓN 1: Nuevo handler para los inputs de presentación
         function handlePresentationChange(event) {
             const input = event.target;
             if (input.classList.contains('presentation-input')) {
                 const { scenario, stepIndex } = input.dataset;
+                // Llamar con forceDefaults = false
                 updateSingleDrugCard(scenario, parseInt(stepIndex, 10), false);
             }
         }
 
         function switchTab(event) {
             const targetButton = event.target.closest('.tab-button');
+            // Salir si es un botón de fármaco (manejado por handleOptionClick)
             if (!targetButton || targetButton.dataset.stepIndex) return; 
 
             tabsContainer.querySelectorAll('.tab-button').forEach(button => {
@@ -891,15 +1144,21 @@
 
         // --- INITIALIZATION ---
         
+        /**
+         * Inicializa el estado seleccionando el fármaco "optimal" por defecto.
+         */
         function initializeState() {
             for (const scenarioName in drugDatabase) {
                 selectedOptions[scenarioName] = drugDatabase[scenarioName].steps.map(step => {
                     const optimalIndex = step.options.findIndex(opt => opt.suitability === 'optimal');
-                    return optimalIndex !== -1 ? optimalIndex : 0;
+                    return optimalIndex !== -1 ? optimalIndex : 0; // Default to optimal, or 0 if none found
                 });
             }
         }
 
+        /**
+         * FASE 2: Carga el estado guardado de los checklists (SOAPME y LEMON) desde localStorage.
+         */
         function loadChecklistState() {
             try {
                 const savedItems = JSON.parse(localStorage.getItem('savedChecklistItems') || '[]');
@@ -913,184 +1172,60 @@
                 }
             } catch (e) {
                 console.error("Error al cargar estado del checklist:", e);
-                localStorage.removeItem('savedChecklistItems');
+                localStorage.removeItem('savedChecklistItems'); // Limpiar si está corrupto
             }
         }
-
-        // --- FASE 3: LÓGICA PWA Y OFFLINE ---
-
-        /**
-         * Actualiza el panel de estado.
-         */
-        function updateStatus(message, statusType) {
-            if (!statusPanel) return;
-            statusPanel.textContent = message;
-            statusPanel.className = 'status-connecting'; // Reset
-            if (statusType === 'ready') {
-                statusPanel.classList.add('status-ready');
-            } else if (statusType === 'offline') {
-                statusPanel.classList.add('status-offline');
-            } else {
-                 statusPanel.classList.add('status-connecting');
-            }
-        }
-
-        /**
-         * Verifica si el video ya está en caché.
-         */
-        async function checkVideoCache() {
-            if ('caches' in window) {
-                try {
-                    const cache = await caches.open(VIDEO_CACHE_NAME);
-                    const match = await cache.match(VIDEO_ASSET_URL);
-                    if (match) {
-                        downloadProgress.textContent = "Guía de video ya descargada.";
-                        downloadBtn.disabled = true;
-                        downloadBtn.textContent = "Guía Descargada";
-                    }
-                } catch (e) {
-                    console.error("Error chequeando caché de video:", e);
-                }
-            }
-        }
-
-        /**
-         * Maneja el click para descargar el video.
-         */
-        async function handleVideoDownload() {
-            downloadBtn.disabled = true;
-            downloadProgress.textContent = "Iniciando descarga... (0%)";
-
-            try {
-                // 1. Fetch el recurso
-                // Usamos 'Request' para asegurar que no use el caché de http
-                const request = new Request(VIDEO_ASSET_URL, { cache: 'reload' });
-                const response = await fetch(request);
-
-                if (!response.ok) {
-                    throw new Error(`Error al descargar video: ${response.statusText}`);
-                }
-
-                const contentLength = response.headers.get('content-length');
-                if (!contentLength) {
-                    downloadProgress.textContent = "Descargando... (tamaño no disponible)";
-                }
-                
-                const total = parseInt(contentLength, 10);
-                let loaded = 0;
-
-                // 2. Crear una nueva respuesta con un body 'leíble'
-                const reader = response.body.getReader();
-                const stream = new ReadableStream({
-                    start(controller) {
-                        function push() {
-                            reader.read().then(({ done, value }) => {
-                                if (done) {
-                                    controller.close();
-                                    return;
-                                }
-                                loaded += value.byteLength;
-                                if (total) {
-                                    const percent = Math.round((loaded / total) * 100);
-                                    downloadProgress.textContent = `Descargando... (${percent}%)`;
-                                }
-                                controller.enqueue(value);
-                                push();
-                            }).catch(err => {
-                                console.error(err);
-                                controller.error(err);
-                            });
-                        }
-                        push();
-                    }
-                });
-
-                // 3. Crear una nueva respuesta con el stream
-                const streamResponse = new Response(stream, { headers: response.headers });
-                
-                // 4. Abrir caché y guardarlo
-                const cache = await caches.open(VIDEO_CACHE_NAME);
-                await cache.put(VIDEO_ASSET_URL, streamResponse);
-
-                downloadProgress.textContent = "¡Descarga completa! El video está disponible offline.";
-                downloadBtn.textContent = "Guía Descargada";
-
-            } catch (error) {
-                console.error("Fallo al descargar el video:", error);
-                downloadProgress.textContent = "Error en la descarga. Intente de nuevo.";
-                downloadBtn.disabled = false;
-            }
-        }
-
 
         // --- Event Listeners ---
+        // FASE 1 - CORRECCIÓN 2: 'calculateBtn' listener eliminado
+        // calculateBtn.addEventListener('click', handleCalculate); 
+        
+        // FASE 1 - CORRECCIÓN 2: Nuevo listener en 'weightInput'
         weightInput.addEventListener('input', handleCalculate); 
+        
         clearBtn.addEventListener('click', handleClear);
-        tabsContainer.addEventListener('click', switchTab);
-        scenariosContainer.addEventListener('click', handleOptionClick);
+        tabsContainer.addEventListener('click', switchTab); // Maneja pestañas de escenario
+        scenariosContainer.addEventListener('click', handleOptionClick); // Maneja botones de fármacos
+        
+        // FASE 1 - CORRECCIÓN 1: Nuevo listener para cambios en presentación
         scenariosContainer.addEventListener('input', handlePresentationChange); 
         
+        // Nuevo Listener para Calculadora Pediátrica
         if (pediatricAgeInput) {
             pediatricAgeInput.addEventListener('input', handlePediatricAgeChange);
         }
 
+        // FASE 1 - CORRECCIÓN 2: 'keydown' listener modificado para llamar a handleCalculate (aunque 'input' ya lo cubre)
         weightInput.addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
                 event.preventDefault();
-                handleCalculate();
+                handleCalculate(); // Opcional, ya que 'input' lo habrá hecho, pero no hace daño
             }
         });
 
+        // FASE 2: Listener global para persistencia de checklists (delegación de eventos)
         document.addEventListener('click', handleChecklistClick);
-
-        // FASE 3: Listener para el botón de descarga
-        if (downloadBtn) {
-            downloadBtn.addEventListener('click', handleVideoDownload);
-        }
 
 
         // --- RUN ---
-        loadChecklistState(); 
-        updateLemonScore();   
+        loadChecklistState(); // FASE 2: Cargar estado guardado ANTES de inicializar lo demás
+        updateLemonScore();   // FASE 2 (REVISIÓN): Calcular score LEMON inicial al cargar
         
         initializeState();
         renderScenarioUI();
         updateAllCalculations();
         
-        // --- FASE 3: SCRIPT DE REGISTRO DEL SERVICE WORKER (Modificado) ---
+        // --- SCRIPT DE REGISTRO DEL SERVICE WORKER ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
               navigator.serviceWorker.register('/sw.js')
                 .then(registration => {
                   console.log('ServiceWorker registrado con éxito: ', registration.scope);
-                  
-                  // El SW está activo y controlando la página
-                  if (navigator.serviceWorker.controller) {
-                    updateStatus('✅ App lista para uso offline.', 'ready');
-                  } else {
-                    // Si no hay controller, es la primera vez o un refresh
-                    updateStatus('✅ App cargada. Lista para uso.', 'ready');
-                  }
-                  
-                  // Chequear si el video ya está descargado
-                  checkVideoCache();
                 })
                 .catch(error => {
                   console.log('Fallo en el registro del ServiceWorker: ', error);
-                  updateStatus('❌ Error al cargar modo offline.', 'offline');
                 });
-            
-             // Escuchar si nos quedamos sin conexión
-             window.addEventListener('offline', () => {
-                updateStatus('❌ Estás sin conexión. (Modo Offline)', 'offline');
-             });
-             window.addEventListener('online', () => {
-                updateStatus('✅ Conectado. (Modo Online)', 'ready');
-             });
-
             });
-        } else {
-            updateStatus('❌ Navegador no compatible con modo offline.', 'offline');
         }
         
     </script>
