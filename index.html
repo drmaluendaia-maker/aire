@@ -5,14 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Asistente ISR - Hospital Ilia</title>
     
-    <!-- Metaetiquetas para PWA -->
     <meta name="theme-color" content="#4f46e5"/>
     <link rel="apple-touch-icon" href="https://placehold.co/180x180/4f46e5/ffffff?text=ISR">
     <link rel="icon" type="image/png" sizes="32x32" href="https://placehold.co/32x32/4f46e5/ffffff?text=I">
     <link rel="manifest" href="manifest.json">
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- AÑADIDO: Plugin de Tailwind para Aspect Ratio del Video -->
     <script src="https://cdn.tailwindcss.com?plugins=aspect-ratio"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -44,10 +42,64 @@
         .scenario-card.active {
             display: block;
         }
+        
+        /* --- FASE 2 (REVISIÓN 2): Estilos Checklist --- */
+        
+        /* Estilo para SOAPME (SÍ se tacha) */
         .checklist-item input:checked + label {
             text-decoration: line-through;
-            color: #6b7280;
+            color: #6b7280; /* gris */
         }
+        .checklist-item input:checked + label:hover {
+            color: #9ca3af; /* gris más claro en hover */
+        }
+        .checklist-item label {
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        /* Estilo para LEMON (NO se tacha, se mantiene visible) */
+        .lemon-item input:checked + label {
+            text-decoration: none;
+            color: #e5e7eb; /* Mantiene el color de texto normal */
+            font-weight: 600; /* Opcional: hacerlo negrita */
+        }
+        /* --- Fin Estilos Checklist --- */
+
+
+        /* --- FASE 2 (REVISIÓN 2): Estilos para Scorecard LEMON (con colores G-Y-R) --- */
+        .lemon-score-card {
+            @apply bg-gray-900 rounded-lg p-5 sticky top-6;
+        }
+        .lemon-score-display {
+            @apply flex items-center justify-center w-20 h-20 rounded-full border-4 text-4xl font-bold transition-all duration-300;
+        }
+        .lemon-result-box {
+            @apply mt-4 text-center p-3 rounded-lg border-2 border-dashed transition-all duration-300;
+        }
+        
+        /* Safe (0 puntos) - VERDE */
+        .lemon-score-safe { @apply border-green-500 text-green-400; }
+        .lemon-result-safe { 
+            @apply border-green-600 bg-green-900 bg-opacity-30 text-green-300;
+        }
+        .lemon-result-safe h5 { @apply text-green-400; }
+        
+        /* Warning (1-2 puntos) - AMARILLO */
+        .lemon-score-warning { @apply border-yellow-500 text-yellow-400; }
+        .lemon-result-warning { 
+            @apply border-yellow-500 bg-yellow-900 bg-opacity-30 text-yellow-300;
+        }
+        .lemon-result-warning h5 { @apply text-yellow-400; }
+        
+        /* Danger (3+ puntos) - ROJO */
+        .lemon-score-danger { @apply border-red-500 text-red-400; }
+        .lemon-result-danger { 
+            @apply border-red-500 bg-red-900 bg-opacity-30 text-red-300;
+        }
+        .lemon-result-danger h5 { @apply text-red-400; }
+        /* --- Fin Estilos LEMON --- */
+
 
         .step-header {
             @apply flex justify-between items-baseline mb-3 border-b border-gray-700 pb-2;
@@ -164,7 +216,6 @@
 <body class="bg-gray-900 text-gray-200 antialiased">
 
     <div class="container mx-auto p-4 md:p-8 max-w-5xl">
-        <!-- Título -->
         <header class="text-center mb-8">
              <div class="flex items-center justify-center gap-4">
                 <svg class="w-10 h-10 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -177,12 +228,10 @@
             <p class="mt-1 text-base text-gray-500">La Paz, Mendoza</p>
         </header>
 
-        <!-- Peso -->
         <div class="mb-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
             <label for="patient-weight" class="block text-lg font-semibold text-gray-300 mb-2">Peso del Paciente (kg)</label>
             <div class="flex items-center gap-4">
                 <input type="number" id="patient-weight" placeholder="Ej: 70" class="w-full bg-gray-700 text-white rounded-lg border-2 border-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 p-3 text-lg transition-all duration-300">
-                <!-- FASE 1 - CORRECCIÓN 2: Botón "Generar" eliminado -->
                 <button id="clear-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-5 rounded-lg transition-colors">
                     Limpiar
                 </button>
@@ -190,24 +239,82 @@
             <p id="weight-display" class="text-sm text-green-400 mt-2 h-5"></p>
         </div>
 
-        <!-- Paso 1: Preparación (Checklist) -->
         <div class="mb-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
-            <h2 class="text-2xl font-bold text-indigo-400 mb-4"><span class="text-gray-500 font-normal">Paso 1:</span> Checklist de Preparación (SOAPME)</h2>
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4"><span class="text-gray-500 font-normal">Paso 1:</span> Score de Vía Aérea Difícil (LEMON)</h2>
+            <p class="text-gray-400 text-sm mb-6">Marque cada criterio que esté presente. Un score <strong class="text-yellow-400">≥ 3</strong> predice una alta probabilidad de Vía Aérea Difícil (VAD).</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="md:col-span-2 space-y-5">
+                    
+                    <div class="checklist-item lemon-item">
+                        <input id="l1" type="checkbox" data-points="1" class="lemon-check form-checkbox h-5 w-5 bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600">
+                        <label for="l1" class="ml-3 text-lg font-semibold text-gray-100">L<span class="text-indigo-400">ook</span> (Signos Externos)</label>
+                        <p class="ml-8 text-sm text-gray-400">Trauma facial/cuello, obesidad, barba, cuello corto, macroglosia, dentadura anómala.</p>
+                    </div>
+
+                    <div class="checklist-item lemon-item">
+                        <input id="l2" type="checkbox" data-points="1" class="lemon-check form-checkbox h-5 w-5 bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600">
+                        <label for="l2" class="ml-3 text-lg font-semibold text-gray-100">E<span class="text-indigo-400">valuate</span> (Regla 3-3-2)</label>
+                        <p class="ml-8 text-sm text-gray-400">CUALQUIERA de los siguientes: <br>
+                            1. Apertura oral &lt; 3 dedos.<br>
+                            2. Distancia Mentón-Hioides &lt; 3 dedos.<br>
+                            3. Distancia Hioides-Cartílago Tiroides &lt; 2 dedos.</p>
+                    </div>
+
+                    <div class="checklist-item lemon-item">
+                        <input id="l3" type="checkbox" data-points="1" class="lemon-check form-checkbox h-5 w-5 bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600">
+                        <label for="l3" class="ml-3 text-lg font-semibold text-gray-100">M<span class="text-indigo-400">allampati</span> (Score III o IV)</label>
+                        <p class="ml-8 text-sm text-gray-400">Incapacidad de ver la úvula o paladar blando. (Sospechado en paciente no colaborador).</p>
+                        <img src="mallampati.jpg" alt="Escala de Mallampati" class="ml-8 mt-3 rounded-lg shadow-md w-full max-w-sm">
+                    </div>
+
+                    <div class="checklist-item lemon-item">
+                        <input id="l4" type="checkbox" data-points="1" class="lemon-check form-checkbox h-5 w-5 bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600">
+                        <label for="l4" class="ml-3 text-lg font-semibold text-gray-100">O<span class="text-indigo-400">bstruction</span> (Obstrucción)</label>
+                        <p class="ml-8 text-sm text-gray-400">Presencia de estridor, voz apagada, epiglotitis, angioedema, o tumor en vía aérea.</p>
+                    </div>
+
+                    <div class="checklist-item lemon-item">
+                        <input id="l5" type="checkbox" data-points="1" class="lemon-check form-checkbox h-5 w-5 bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600">
+                        <label for="l5" class="ml-3 text-lg font-semibold text-gray-100">N<span class="text-indigo-400">eck</span> (Movilidad del Cuello)</label>
+                        <p class="ml-8 text-sm text-gray-400">Movilidad cervical limitada, collarín cervical, paciente en tabla espinal, artritis reumatoide severa.</p>
+                    </div>
+
+                </div>
+                
+                <div class="md:col-span-1">
+                    <div class="lemon-score-card">
+                        <h3 class="text-lg font-semibold text-gray-300 text-center mb-4">SCORE LEMON</h3>
+                        <div class="flex justify-center">
+                            <div id="lemon-score-display" class="lemon-score-display lemon-score-safe">
+                                <span id="lemon-score">0</span>
+                            </div>
+                        </div>
+                        
+                        <div id="lemon-result-box" class="lemon-result-box lemon-result-safe">
+                            <h5 class="font-bold text-lg">Vía Aérea No Dificultosa</h5>
+                            <p class="text-sm">Proceda con el plan estándar.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="mb-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4"><span class="text-gray-500 font-normal">Paso 2:</span> Checklist de Preparación (SOAPME)</h2>
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 text-sm">
-                <!-- S -->
                 <div class="space-y-2">
                     <h3 class="font-bold text-lg text-gray-300">S<span class="text-indigo-400">uction</span> (Aspiración)</h3>
                     <div class="checklist-item"><input id="c1" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c1" class="ml-2">Sistema de aspiración funcional</label></div>
                     <div class="checklist-item"><input id="c2" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c2" class="ml-2">Cánula de Yankauer</label></div>
                 </div>
-                <!-- O -->
                 <div class="space-y-2">
                     <h3 class="font-bold text-lg text-gray-300">O<span class="text-indigo-400">xygen</span> (Oxígeno)</h3>
                     <div class="checklist-item"><input id="c3" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c3" class="ml-2">Fuente de O₂ de alto flujo</label></div>
                     <div class="checklist-item"><input id="c4" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c4" class="ml-2">Mascarilla con reservorio</label></div>
                     <div class="checklist-item"><input id="c5" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c5" class="ml-2">Bolsa autoinflable (Ambú)</label></div>
                 </div>
-                <!-- A -->
                 <div class="space-y-2">
                     <h3 class="font-bold text-lg text-gray-300">A<span class="text-indigo-400">irway</span> (Vía Aérea)</h3>
                     <div class="checklist-item"><input id="c6" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c6" class="ml-2">Laringoscopio (mango y pilas OK)</label></div>
@@ -216,15 +323,13 @@
                     <div class="checklist-item"><input id="c9" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c9" class="ml-2">Guía o estilete</label></div>
                     <div class="checklist-item"><input id="c10" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c10" class="ml-2">Jeringa de 10cc</label></div>
                 </div>
-                <!-- P -->
-                 <div class="space-y-2">
+                <div class="space-y-2">
                     <h3 class="font-bold text-lg text-gray-300">P<span class="text-indigo-400">harmacy</span> (Fármacos)</h3>
                     <div class="checklist-item"><input id="c11" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c11" class="ml-2">Agentes de inducción cargados</label></div>
                     <div class="checklist-item"><input id="c12" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c12" class="ml-2">Bloqueantes neuromusculares</label></div>
                     <div class="checklist-item"><input id="c13" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c13" class="ml-2">Fármacos de pre-tratamiento</label></div>
                     <div class="checklist-item"><input id="c14" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c14" class="ml-2">Vasopresores (ej. adrenalina)</label></div>
                 </div>
-                <!-- M -->
                 <div class="space-y-2">
                     <h3 class="font-bold text-lg text-gray-300">M<span class="text-indigo-400">onitoring</span> (Monitorización)</h3>
                     <div class="checklist-item"><input id="c15" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c15" class="ml-2">Monitor cardíaco / EKG</label></div>
@@ -232,8 +337,7 @@
                     <div class="checklist-item"><input id="c17" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c17" class="ml-2">Pulsioximetría</label></div>
                     <div class="checklist-item"><input id="c18" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c18" class="ml-2">Capnografía (EtCO₂)</label></div>
                 </div>
-                <!-- E -->
-                 <div class="space-y-2">
+                <div class="space-y-2">
                     <h3 class="font-bold text-lg text-gray-300">E<span class="text-indigo-400">quipment</span> (Vía Aérea Fallida)</h3>
                     <div class="checklist-item"><input id="c19" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c19" class="ml-2">Plan B: Dispositivo supraglótico</label></div>
                     <div class="checklist-item"><input id="c20" type="checkbox" class="form-checkbox bg-gray-700 border-gray-500 text-indigo-500 rounded focus:ring-indigo-600"><label for="c20" class="ml-2">Plan D: Equipo de cricotiroidotomía</label></div>
@@ -241,11 +345,9 @@
             </div>
         </div>
 
-        <!-- Paso 2: Dispositivos -->
         <div class="mb-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
-            <h2 class="text-2xl font-bold text-indigo-400 mb-4"><span class="text-gray-500 font-normal">Paso 2:</span> Selección de Dispositivos</h2>
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4"><span class="text-gray-500 font-normal">Paso 3:</span> Selección de Dispositivos</h2>
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Tubo IOT -->
                 <div>
                     <h3 class="text-xl font-semibold text-gray-300 mb-3">Tubo Endotraqueal (IOT)</h3>
                     <div class="space-y-3">
@@ -257,7 +359,6 @@
                             </ul>
                         </div>
                         
-                        <!-- FASE 1 - CORRECCIÓN 3.2: Sección Neonatos -->
                         <div>
                             <h4 class="font-semibold text-gray-200">Neonatos y Lactantes (&lt; 1 año):</h4>
                             <ul class="list-disc list-inside text-gray-400">
@@ -272,10 +373,8 @@
                             <p class="text-gray-400 text-sm">Sin manguito: <code class="bg-gray-700 p-1 rounded">(Edad / 4) + 4</code></p>
                             <p class="text-gray-400 text-sm mt-1">Con manguito: <code class="bg-gray-700 p-1 rounded">(Edad / 4) + 3.5</code></p>
 
-                            <!-- Nueva Calculadora Pediátrica -->
                             <div class="mt-4 pt-4 border-t border-gray-700">
                                 <label for="pediatric-age-input" class="block text-sm font-medium text-gray-300 mb-2">Calcular (Edad en años):</label>
-                                <!-- FASE 1 - CORRECCIÓN 3.1: Añadido min="0" -->
                                 <input type="number" id="pediatric-age-input" placeholder="Ej: 5" min="0" class="w-full bg-gray-700 text-white rounded-lg border-2 border-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 p-2 text-sm">
                                 
                                 <div class="mt-3 grid grid-cols-2 gap-2">
@@ -289,13 +388,10 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Fin de Nueva Calculadora -->
-
-                        </div>
+                            </div>
                     </div>
                 </div>
 
-                <!-- Cánula Guedel (CONTENIDO RESTAURADO) -->
                 <div>
                     <h3 class="text-xl font-semibold text-gray-300 mb-3">Cánula de Guedel (Mayo)</h3>
                      <ul class="space-y-1 text-gray-400 text-sm">
@@ -310,7 +406,6 @@
                     </ul>
                 </div>
                 
-                <!-- Hojas Laringo (CONTENIDO RESTAURADO) -->
                 <div>
                     <h3 class="text-xl font-semibold text-gray-300 mb-3">Hojas de Laringoscopio</h3>
                     <div class="space-y-3">
@@ -337,11 +432,9 @@
             </div>
         </div>
         
-        <!-- Paso 3: Pre-oxigenación -->
         <div class="mb-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
-            <h2 class="text-2xl font-bold text-indigo-400 mb-4"><span class="text-gray-500 font-normal">Paso 3:</span> Pre-oxigenación</h2>
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4"><span class="text-gray-500 font-normal">Paso 4:</span> Pre-oxigenación</h2>
             <div class="flex items-start gap-4 p-4 bg-gray-700 rounded-lg">
-                <!-- Icono de Reloj -->
                 <svg class="w-10 h-10 text-indigo-300 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -353,11 +446,9 @@
             </div>
         </div>
 
-        <!-- Paso 4: Dosis -->
         <div>
-            <h2 class="text-2xl font-bold text-indigo-400 mb-4 text-center"><span class="text-gray-500 font-normal">Paso 4:</span> Cálculo de Dosis (Farmacología)</h2>
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4 text-center"><span class="text-gray-500 font-normal">Paso 5:</span> Cálculo de Dosis (Farmacología)</h2>
             
-            <!-- Línea de Tiempo Visual -->
             <div class="timeline">
                 <div class="timeline-step timeline-step-1">
                     <div class="timeline-dot"></div>
@@ -378,7 +469,6 @@
                 </div>
             </div>
             
-            <!-- Tabs de Escenarios -->
             <div class="mb-6">
                 <nav class="flex flex-wrap justify-center gap-2 md:gap-4" id="scenario-tabs">
                     <button data-scenario="standard" class="tab-button tab-active text-sm md:text-base py-2 px-4 rounded-lg border-2 transition-all duration-300">Paciente Estándar</button>
@@ -388,27 +478,22 @@
                 </nav>
             </div>
 
-            <!-- Contenedor de Escenarios -->
             <div id="scenarios-container">
-                <!-- Escenario Estándar -->
                 <div id="standard" class="scenario-card active">
                     <h3 class="text-2xl font-bold text-gray-200 mb-2" id="standard-name"></h3>
                     <p class="text-gray-400 mb-6" id="standard-objective"></p>
                     <div class="space-y-0" id="standard-steps-container"></div>
                 </div>
-                <!-- Escenario Hemodinámico -->
                 <div id="hemodynamic" class="scenario-card">
                     <h3 class="text-2xl font-bold text-gray-200 mb-2" id="hemodynamic-name"></h3>
                     <p class="text-gray-400 mb-6" id="hemodynamic-objective"></p>
                     <div class="space-y-0" id="hemodynamic-steps-container"></div>
                 </div>
-                <!-- Escenario TCE -->
                 <div id="tce" class="scenario-card">
                     <h3 class="text-2xl font-bold text-gray-200 mb-2" id="tce-name"></h3>
                     <p class="text-gray-400 mb-6" id="tce-objective"></p>
                     <div class="space-y-0" id="tce-steps-container"></div>
                 </div>
-                <!-- Escenario Broncoespasmo -->
                 <div id="bronchospasm" class="scenario-card">
                      <h3 class="text-2xl font-bold text-gray-200 mb-2" id="bronchospasm-name"></h3>
                     <p class="text-gray-400 mb-6" id="bronchospasm-objective"></p>
@@ -417,9 +502,8 @@
             </div>
         </div>
 
-        <!-- Paso 5: Procedimiento Post-Parálisis -->
         <div class="mt-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
-            <h2 class="text-2xl font-bold text-indigo-400 mb-4"><span class="text-gray-500 font-normal">Paso 5:</span> Posicionamiento y Procedimiento</h2>
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4"><span class="text-gray-500 font-normal">Paso 6:</span> Posicionamiento y Procedimiento</h2>
             <ol class="list-decimal list-inside space-y-4 text-gray-300">
                 <li>
                     <strong class="font-semibold text-gray-100">Posicionamiento y Protección:</strong>
@@ -433,11 +517,9 @@
                     <strong class="font-semibold text-gray-100">Manejo Post-Intubación (Confirmación):</strong>
                     <p class="text-sm text-gray-400 ml-5">El paso más crítico. Confirme la posición con <strong class="text-yellow-300">Capnografía de Onda (EtCO₂)</strong> (Gold Standard). Ausculte y asegure el tubo. Inicie sedación continua.</p>
                     
-                    <!-- DOPE Mnemonic Desarrollado -->
                     <div class="bg-gray-700 p-4 rounded-lg mt-4 ml-5">
                         <h4 class="font-semibold text-yellow-300 mb-3">Si hay deterioro súbito, evalúe (DOPE):</h4>
                         <div class="space-y-3">
-                            <!-- D -->
                             <div class="dope-item">
                                 <div class="dope-letter">D</div>
                                 <div class="dope-content">
@@ -445,7 +527,6 @@
                                     <p>¿Se movió el tubo? (ej. extubación, intubación bronquial derecha). Re-evaluar profundidad y auscultar.</p>
                                 </div>
                             </div>
-                            <!-- O -->
                             <div class="dope-item">
                                 <div class="dope-letter">O</div>
                                 <div class="dope-content">
@@ -453,7 +534,6 @@
                                     <p>¿Está el tubo tapado? (secreciones, sangre, acodamiento). Intentar aspirar con sonda.</p>
                                 </div>
                             </div>
-                            <!-- P -->
                             <div class="dope-item">
                                 <div class="dope-letter">P</div>
                                 <div class="dope-content">
@@ -461,7 +541,6 @@
                                     <p>¿Pulmón colapsado? (especialmente a tensión). Auscultar, percutir, confirmar con ecografía o Rx.</p>
                                 </div>
                             </div>
-                            <!-- E -->
                             <div class="dope-item">
                                 <div class="dope-letter">E</div>
                                 <div class="dope-content">
@@ -475,7 +554,6 @@
             </ol>
         </div>
 
-        <!-- NUEVA SECCIÓN DE VIDEO: Guía Visual -->
         <div class="mt-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
             <h2 class="text-2xl font-bold text-indigo-400 mb-4"><span class="text-gray-500 font-normal">Guía Visual:</span> Video de Intubación</h2>
             <p class="text-gray-400 mb-4 text-sm">Este video es un recurso de apoyo adicional. Asegúrese de que esté completamente cargado y probado sin conexión.</p>
@@ -488,9 +566,8 @@
             <p class="text-xs text-gray-500 mt-2 text-center">Video de referencia (8Mb). La primera carga (para caché) puede demorar.</p>
         </div>
 
-        <!-- Paso 6: Plan de Vía Aérea Fallida -->
         <div class="mt-8 mb-8 p-6 bg-gray-800 rounded-2xl shadow-lg">
-            <h2 class="text-2xl font-bold text-indigo-400 mb-4"><span class="text-gray-500 font-normal">Paso 6:</span> Plan de Vía Aérea Fallida</h2>
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4"><span class="text-gray-500 font-normal">Paso 7:</span> Plan de Vía Aérea Fallida</h2>
             <div class="space-y-4">
                 <div>
                     <span class="inline-flex items-center rounded-md bg-blue-700 px-3 py-1 text-lg font-bold text-blue-100">Plan A: Intubación Orotraqueal</span>
@@ -512,7 +589,6 @@
             </div>
         </div>
 
-        <!-- Footer: Firma y Disclaimer -->
         <footer class="mt-12 text-center pb-4">
             <p class="text-lg text-gray-500 italic">Dr. Maluenda</p>
             
@@ -523,24 +599,23 @@
             </div>
         </footer>
 
-    </div> <!-- Fin de .container -->
-
-    <script>
-        // **** BASE DE DATOS DE FÁRMACOS ****
+    </div> <script>
+        // **** BASE DE DATOS de FÁRMACOS ****
         // FASE 1 - CORRECCIÓN 1: 'concentration' y 'presentation' reemplazados por 'presentation_text', 'default_mass', y 'default_vol'
+        // FASE 2: Títulos de pasos re-numerados (4.x -> 5.x)
         const drugDatabase = {
             standard: {
                 name: 'Paciente Estándar (Normotenso)',
                 objective: 'Objetivo: Inducción rápida y suave con recuperación predecible.',
                 steps: [
                     {
-                        title: 'Paso 4.1: Pre-tratamiento', time_explained: '(3 min ANTES de Inducción)',
+                        title: 'Paso 5.1: Pre-tratamiento', time_explained: '(3 min ANTES de Inducción)',
                         options: [
                             { name: 'Fentanilo', dose: [1, 2], unit: 'mcg/kg', type: 'pretreatment', suitability: 'optimal', warning: null, presentation_text: 'Amp: 100 mcg / 2 ml', default_mass: 100, default_vol: 2, prep_unit: 'ml' }
                         ]
                     },
                     {
-                        title: 'Paso 4.2: Inducción', time_explained: '(AHORA)',
+                        title: 'Paso 5.2: Inducción', time_explained: '(AHORA)',
                         options: [
                             { name: 'Propofol', dose: [1.5, 2], unit: 'mg/kg', type: 'induction', suitability: 'optimal', warning: null, presentation_text: 'Amp: 200 mg / 20 ml', default_mass: 200, default_vol: 20, prep_unit: 'ml' },
                             { name: 'Etomidato', dose: [0.3, 0.3], unit: 'mg/kg', type: 'induction', suitability: 'caution', warning: 'Fármaco seguro, pero puede causar supresión adrenal. No es 1ra línea si hay Propofol.', presentation_text: 'Amp: 20 mg / 10 ml', default_mass: 20, default_vol: 10, prep_unit: 'ml' },
@@ -548,7 +623,7 @@
                         ]
                     },
                     {
-                        title: 'Paso 4.3: Parálisis', time_explained: '(5 seg DESPUÉS de Inducción)',
+                        title: 'Paso 5.3: Parálisis', time_explained: '(5 seg DESPUÉS de Inducción)',
                         options: [
                             { name: 'Succinilcolina', dose: [1.5, 1.5], unit: 'mg/kg', type: 'paralysis', suitability: 'optimal', warning: '¡Chequear contraindicaciones! (Hiperkalemia, Quemados, ACV, etc.)', presentation_text: 'Amp: 100 mg / 2 ml', default_mass: 100, default_vol: 2, prep_unit: 'ml' },
                             { name: 'Rocuronio', dose: [1.2, 1.2], unit: 'mg/kg', type: 'paralysis', suitability: 'caution', warning: 'Opción segura si Succinilcolina está contraindicada. Su duración es más larga (30-40 min).', presentation_text: 'Amp: 50 mg / 5 ml', default_mass: 50, default_vol: 5, prep_unit: 'ml' }
@@ -561,14 +636,14 @@
                 objective: 'Objetivo: Lograr inconsciencia y parálisis con mínimo impacto cardiovascular.',
                 steps: [
                     {
-                        title: 'Paso 4.1: Pre-tratamiento', time_explained: '(3 min ANTES de Inducción)',
+                        title: 'Paso 5.1: Pre-tratamiento', time_explained: '(3 min ANTES de Inducción)',
                         options: [
                             { name: 'Omitir Pre-tto', dose: [0, 0], unit: 'mcg/kg', type: 'omit', suitability: 'optimal', warning: null, note: 'Omitir en shock severo para evitar hipotensión.' },
                             { name: 'Fentanilo (Dosis Baja)', dose: [0.5, 0.5], unit: 'mcg/kg', type: 'pretreatment', suitability: 'caution', warning: 'Usar con extrema precaución. Puede empeorar la hipotensión.', presentation_text: 'Amp: 100 mcg / 2 ml', default_mass: 100, default_vol: 2, prep_unit: 'ml' }
                         ]
                     },
                     {
-                        title: 'Paso 4.2: Inducción', time_explained: '(AHORA)',
+                        title: 'Paso 5.2: Inducción', time_explained: '(AHORA)',
                         options: [
                             { name: 'Etomidato', dose: [0.3, 0.3], unit: 'mg/kg', type: 'induction', suitability: 'optimal', warning: 'El agente de inducción más hemodinámicamente neutro.', presentation_text: 'Amp: 20 mg / 10 ml', default_mass: 20, default_vol: 10, prep_unit: 'ml' },
                             { name: 'Ketamina', dose: [1, 2], unit: 'mg/kg', type: 'induction', suitability: 'optimal', warning: 'Excelente alternativa. Aumenta la PA y FC. (Evitar en shock cardiogénico).', presentation_text: 'Amp: 500 mg / 10 ml', default_mass: 500, default_vol: 10, prep_unit: 'ml' },
@@ -576,7 +651,7 @@
                         ]
                     },
                     {
-                        title: 'Paso 4.3: Parálisis', time_explained: '(5 seg DESPUÉS de Inducción)',
+                        title: 'Paso 5.3: Parálisis', time_explained: '(5 seg DESPUÉS de Inducción)',
                         options: [
                             { name: 'Rocuronio', dose: [1.2, 1.2], unit: 'mg/kg', type: 'paralysis', suitability: 'optimal', warning: 'Preferido para evitar la bradicardia vagal que puede inducir la Succinilcolina.', presentation_text: 'Amp: 50 mg / 5 ml', default_mass: 50, default_vol: 5, prep_unit: 'ml' },
                             { name: 'Succinilcolina', dose: [1.5, 1.5], unit: 'mg/kg', type: 'paralysis', suitability: 'caution', warning: 'Usable, pero puede causar bradicardia, especialmente en segundas dosis.', presentation_text: 'Amp: 100 mg / 2 ml', default_mass: 100, default_vol: 2, prep_unit: 'ml' }
@@ -589,19 +664,19 @@
                 objective: 'Objetivo: Asegurar vía aérea, prevenir aumento de PIC y mantener perfusión cerebral.',
                 steps: [
                     {
-                        title: 'Paso 4.1: Neuroprotección', time_explained: '(3 min ANTES de Inducción)',
+                        title: 'Paso 5.1: Neuroprotección', time_explained: '(3 min ANTES de Inducción)',
                         options: [
                             { name: 'Lidocaína', dose: [1.5, 1.5], unit: 'mg/kg', type: 'pretreatment', suitability: 'optimal', warning: null, presentation_text: 'Amp (2%): 100 mg / 5 ml', default_mass: 100, default_vol: 5, prep_unit: 'ml' }
                         ]
                     },
                     {
-                        title: 'Paso 4.2: Simpatolisis', time_explained: '(3 min ANTES de Inducción)',
+                        title: 'Paso 5.2: Simpatolisis', time_explained: '(3 min ANTES de Inducción)',
                         options: [
                             { name: 'Fentanilo', dose: [1, 2], unit: 'mcg/kg', type: 'pretreatment', suitability: 'optimal', warning: 'Atenúa la respuesta simpática (aumento de PA/PIC) a la laringoscopia.', presentation_text: 'Amp: 100 mcg / 2 ml', default_mass: 100, default_vol: 2, prep_unit: 'ml' }
                         ]
                     },
                     {
-                        title: 'Paso 4.3: Inducción', time_explained: '(AHORA)',
+                        title: 'Paso 5.3: Inducción', time_explained: '(AHORA)',
                         options: [
                             { name: 'Etomidato', dose: [0.3, 0.3], unit: 'mg/kg', type: 'induction', suitability: 'optimal', warning: 'Opción ideal: reduce la PIC y es hemodinámicamente neutro.', presentation_text: 'Amp: 20 mg / 10 ml', default_mass: 20, default_vol: 10, prep_unit: 'ml' },
                             { name: 'Propofol', dose: [1, 1.5], unit: 'mg/kg', type: 'induction', suitability: 'caution', warning: 'Solo si la PA es estable o alta. Reduce la PIC pero puede causar hipotensión, bajando la Presión de Perfusión Cerebral.', presentation_text: 'Amp: 200 mg / 20 ml', default_mass: 200, default_vol: 20, prep_unit: 'ml' },
@@ -609,7 +684,7 @@
                         ]
                     },
                     {
-                        title: 'Paso 4.4: Parálisis', time_explained: '(5 seg DESPUÉS de Inducción)',
+                        title: 'Paso 5.4: Parálisis', time_explained: '(5 seg DESPUÉS de Inducción)',
                         options: [
                             { name: 'Rocuronio', dose: [1.2, 1.2], unit: 'mg/kg', type: 'paralysis', suitability: 'optimal', warning: 'Fármaco de elección. Evita las fasciculaciones de la Succinilcolina, que pueden aumentar la PIC.', presentation_text: 'Amp: 50 mg / 5 ml', default_mass: 50, default_vol: 5, prep_unit: 'ml' },
                             { name: 'Succinilcolina', dose: [1.5, 1.5], unit: 'mg/kg', type: 'paralysis', suitability: 'caution', warning: 'Subóptimo. Las fasciculaciones pueden aumentar transitoriamente la PIC.', presentation_text: 'Amp: 100 mg / 2 ml', default_mass: 100, default_vol: 2, prep_unit: 'ml' }
@@ -622,19 +697,19 @@
                 objective: 'Objetivo: Intubar al paciente promoviendo activamente la broncodilatación.',
                 steps: [
                     {
-                        title: 'Paso 4.1: Reactividad Vía Aérea', time_explained: '(3 min ANTES de Inducción)',
+                        title: 'Paso 5.1: Reactividad Vía Aérea', time_explained: '(3 min ANTES de InduCCIÓN)',
                         options: [
                             { name: 'Lidocaína', dose: [1.5, 1.5], unit: 'mg/kg', type: 'pretreatment', suitability: 'optimal', warning: 'Atenúa la reactividad de la vía aérea y el reflejo tusígeno.', presentation_text: 'Amp (2%): 100 mg / 5 ml', default_mass: 100, default_vol: 5, prep_unit: 'ml' }
                         ]
                     },
                     {
-                        title: 'Paso 4.2: Simpatolisis', time_explained: '(3 min ANTES de Inducción)',
+                        title: 'Paso 5.2: Simpatolisis', time_explained: '(3 min ANTES de Inducción)',
                         options: [
                             { name: 'Fentanilo', dose: [1, 1], unit: 'mcg/kg', type: 'pretreatment', suitability: 'optimal', warning: null, presentation_text: 'Amp: 100 mcg / 2 ml', default_mass: 100, default_vol: 2, prep_unit: 'ml' }
                         ]
                     },
                     {
-                        title: 'Paso 4.3: Inducción', time_explained: '(AHORA)',
+                        title: 'Paso 5.3: Inducción', time_explained: '(AHORA)',
                         options: [
                             { name: 'Ketamina', dose: [1, 2], unit: 'mg/kg', type: 'induction', suitability: 'optimal', warning: 'Fármaco de elección por sus potentes propiedades broncodilatadoras.', presentation_text: 'Amp: 500 mg / 10 ml', default_mass: 500, default_vol: 10, prep_unit: 'ml' },
                             { name: 'Propofol', dose: [1.5, 2], unit: 'mg/kg', type: 'induction', suitability: 'caution', warning: 'Seguro (no libera histamina), pero no ofrece el beneficio broncodilatador de la Ketamina.', presentation_text: 'Amp: 200 mg / 20 ml', default_mass: 200, default_vol: 20, prep_unit: 'ml' },
@@ -642,7 +717,7 @@
                         ]
                     },
                     {
-                        title: 'Paso 4.4: Parálisis', time_explained: '(5 seg DESPUÉS de Inducción)',
+                        title: 'Paso 5.4: Parálisis', time_explained: '(5 seg DESPUÉS de Inducción)',
                         options: [
                             { name: 'Rocuronio', dose: [1.2, 1.2], unit: 'mg/kg', type: 'paralysis', suitability: 'optimal', warning: 'Fármaco de elección. No libera histamina.', presentation_text: 'Amp: 50 mg / 5 ml', default_mass: 50, default_vol: 5, prep_unit: 'ml' },
                             { name: 'Succinilcolina', dose: [1.5, 1.5], unit: 'mg/kg', type: 'paralysis', suitability: 'caution', warning: 'Subóptimo. Aunque raro, se ha reportado liberación de histamina que podría empeorar el broncoespasmo.', presentation_text: 'Amp: 100 mg / 2 ml', default_mass: 100, default_vol: 2, prep_unit: 'ml' }
@@ -658,18 +733,68 @@
 
         // --- SELECTORS ---
         const weightInput = document.getElementById('patient-weight');
-        // FASE 1 - CORRECCIÓN 2: 'calculateBtn' ya no es necesario
-        // const calculateBtn = document.getElementById('calculate-btn'); 
         const clearBtn = document.getElementById('clear-btn');
         const weightDisplay = document.getElementById('weight-display');
         const tabsContainer = document.getElementById('scenario-tabs');
         const scenariosContainer = document.getElementById('scenarios-container');
-        // Nuevos Selectores para Calculadora Pediátrica
+        // Pediátricos
         const pediatricAgeInput = document.getElementById('pediatric-age-input');
         const uncuffedResultEl = document.getElementById('tube-uncuffed-result');
         const cuffedResultEl = document.getElementById('tube-cuffed-result');
+        
+        // FASE 2 (REVISIÓN): Selectores LEMON
+        const lemonScoreEl = document.getElementById('lemon-score');
+        const lemonScoreDisplayEl = document.getElementById('lemon-score-display');
+        const lemonResultBoxEl = document.getElementById('lemon-result-box');
+        const lemonCheckboxes = document.querySelectorAll('.lemon-check');
 
         // --- FUNCTIONS ---
+
+        /**
+         * FASE 2 (REVISIÓN 2): Calcula el score LEMON y actualiza la UI con colores G-Y-R.
+         */
+        function updateLemonScore() {
+            let score = 0;
+            lemonCheckboxes.forEach(check => {
+                if (check.checked) {
+                    score += parseInt(check.dataset.points, 10) || 0;
+                }
+            });
+
+            if (!lemonScoreEl || !lemonScoreDisplayEl || !lemonResultBoxEl) return;
+
+            lemonScoreEl.textContent = score;
+
+            // Resetear clases
+            lemonScoreDisplayEl.className = 'lemon-score-display';
+            lemonResultBoxEl.className = 'lemon-result-box';
+
+            if (score >= 3) {
+                // Peligro (Rojo)
+                lemonScoreDisplayEl.classList.add('lemon-score-danger');
+                lemonResultBoxEl.classList.add('lemon-result-danger');
+                lemonResultBoxEl.innerHTML = `
+                    <h5 class="font-bold text-lg">ALERTA: Vía Aérea Difícil</h5>
+                    <p class="text-sm">Score ≥ 3. Anticipe VAD. Pida ayuda experta, considere intubación con paciente despierto o Plan B/D.</p>
+                `;
+            } else if (score > 0) {
+                // Advertencia (Amarillo)
+                lemonScoreDisplayEl.classList.add('lemon-score-warning');
+                lemonResultBoxEl.classList.add('lemon-result-warning');
+                lemonResultBoxEl.innerHTML = `
+                    <h5 class="font-bold text-lg">Precaución: Posible VAD</h5>
+                    <p class="text-sm">Score 1-2. Esté preparado para complicaciones. Tenga listo el equipo de VAD (Plan B).</p>
+                `;
+            } else {
+                // Seguro (Verde)
+                lemonScoreDisplayEl.classList.add('lemon-score-safe');
+                lemonResultBoxEl.classList.add('lemon-result-safe');
+                lemonResultBoxEl.innerHTML = `
+                    <h5 class="font-bold text-lg">Vía Aérea No Dificultosa</h5>
+                    <p class="text-sm">Score 0. Proceda con el plan estándar.</p>
+                `;
+            }
+        }
 
         /**
          * Construye el HTML inicial para todos los escenarios, pasos y opciones.
@@ -709,13 +834,13 @@
                             </div>
                             <div class="option-buttons">${optionButtonsHtml}</div>
                             <div class="drug-details-card" id="details-${scenarioName}-${stepIndex}">
-                                <!-- El contenido se inyectará dinámicamente -->
-                            </div>
+                                </div>
                         </div>
                     `;
 
                     // Añadir bloque de espera didáctico
                     const stepTitleLower = step.title.toLowerCase();
+                    // FASE 2: RENUMERADO - Ajustado para buscar por contenido, no por número de paso
                     if (stepTitleLower.includes('pre-tratamiento') || stepTitleLower.includes('simpatolisis') || stepTitleLower.includes('reactividad') || stepTitleLower.includes('neuroprotección')) {
                         stepsHtml += `
                             <div class="wait-block wait-block-yellow">
@@ -847,8 +972,7 @@
             // FASE 1 - CORRECCIÓN 1: HTML para presentación editable
             const presentationMassUnit = drug.unit.startsWith('mcg') ? 'mcg' : 'mg';
             const presentationHTML = `
-                <div class="detail-item col-span-1 md:col-span-2"> <!-- Ajustado a 2 columnas -->
-                    <h4>Presentación (Editable)</h4>
+                <div class="detail-item col-span-1 md:col-span-2"> <h4>Presentación (Editable)</h4>
                     <p class="text-sm text-gray-300 mb-2">${drug.presentation_text || 'N/A'}</p>
                     <div class="flex items-center gap-2 flex-wrap">
                         <label for="drug-mass-${scenarioName}-${stepIndex}" class="text-sm sr-only">Masa Vial:</label>
@@ -887,6 +1011,40 @@
         }
         
         // --- EVENT HANDLERS ---
+
+        /**
+         * FASE 2: Maneja el click en CUALQUIER checkbox para guardar su estado en localStorage.
+         * FASE 2 (REVISIÓN): Modificado para llamar a updateLemonScore()
+         */
+        function handleChecklistClick(event) {
+            // Solo nos interesan los checkboxes que tengan un ID
+            if (event.target.type !== 'checkbox' || !event.target.id) return; 
+
+            const checkbox = event.target;
+            const id = checkbox.id;
+            
+            try {
+                // Usamos un Set para manejar fácilmente los IDs únicos
+                const savedItems = JSON.parse(localStorage.getItem('savedChecklistItems') || '[]');
+                const itemSet = new Set(savedItems);
+
+                if (checkbox.checked) {
+                    itemSet.add(id);
+                } else {
+                    itemSet.delete(id);
+                }
+                
+                // Convertir el Set de nuevo a un Array y guardar
+                localStorage.setItem('savedChecklistItems', JSON.stringify(Array.from(itemSet)));
+            } catch (e) {
+                console.error("Error al guardar estado del checklist:", e);
+            }
+            
+            // FASE 2 (REVISIÓN): Actualizar score si es un check de LEMON
+            if (checkbox.classList.contains('lemon-check')) {
+                updateLemonScore();
+            }
+        }
         
         // FASE 1 - CORRECCIÓN 2: 'handleCalculate' se mantiene, pero será llamado por 'input'
         function handleCalculate() {
@@ -998,6 +1156,26 @@
             }
         }
 
+        /**
+         * FASE 2: Carga el estado guardado de los checklists (SOAPME y LEMON) desde localStorage.
+         */
+        function loadChecklistState() {
+            try {
+                const savedItems = JSON.parse(localStorage.getItem('savedChecklistItems') || '[]');
+                if (Array.isArray(savedItems)) {
+                    savedItems.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el && el.type === 'checkbox') {
+                            el.checked = true;
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error("Error al cargar estado del checklist:", e);
+                localStorage.removeItem('savedChecklistItems'); // Limpiar si está corrupto
+            }
+        }
+
         // --- Event Listeners ---
         // FASE 1 - CORRECCIÓN 2: 'calculateBtn' listener eliminado
         // calculateBtn.addEventListener('click', handleCalculate); 
@@ -1025,7 +1203,14 @@
             }
         });
 
+        // FASE 2: Listener global para persistencia de checklists (delegación de eventos)
+        document.addEventListener('click', handleChecklistClick);
+
+
         // --- RUN ---
+        loadChecklistState(); // FASE 2: Cargar estado guardado ANTES de inicializar lo demás
+        updateLemonScore();   // FASE 2 (REVISIÓN): Calcular score LEMON inicial al cargar
+        
         initializeState();
         renderScenarioUI();
         updateAllCalculations();
